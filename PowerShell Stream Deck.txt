@@ -1,0 +1,3 @@
+cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive <path to your powershell script>\<your power shell script name>.ps1 'param1' 'param3' 'param3'
+
+cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive D:\Scripts\DisplaySettings.ps1
