@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "Ji+IHM+L24Mjxrm7qy/i1MkQSAQsX37TQ20X1Gp+bGnxK52XQYjWmZKAOXzKfrXs6yuL/b3u8G4hBhNbp/KpVw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\jorda\\Desktop\\AudioDeviceCmdlets\\AudioDevice\\AudioDevice.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jorda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\5.0.4\\microsoft.netcore.app.runtime.win-x86.5.0.4.nupkg.sha512",
+    "C:\\Users\\jorda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\5.0.4\\microsoft.windowsdesktop.app.runtime.win-x86.5.0.4.nupkg.sha512",
+    "C:\\Users\\jorda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\5.0.4\\microsoft.aspnetcore.app.runtime.win-x86.5.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}

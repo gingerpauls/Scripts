@@ -1,0 +1,11 @@
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.exe
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.deps.json
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.runtimeconfig.json
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.pdb
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDeviceCmdlets.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\System.Management.Automation.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\Microsoft.Management.Infrastructure.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\Microsoft.Management.Infrastructure.Native.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDeviceCmdlets.pdb
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\System.Management.Automation.xml
