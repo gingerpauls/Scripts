@@ -1,0 +1,11 @@
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\AudioDeviceCmdlets.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\AudioDeviceCmdlets.pdb
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\System.Management.Automation.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\Microsoft.Management.Infrastructure.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\Microsoft.Management.Infrastructure.Native.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Release\System.Management.Automation.xml
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Release\AudioDeviceCmdlets.csprojAssemblyReference.cache
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Release\AudioDeviceCmdlets.csproj.CoreCompileInputs.cache
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Release\AudioDeviceCmdlets.csproj.CopyComplete
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Release\AudioDeviceCmdlets.dll
+C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Release\AudioDeviceCmdlets.pdb

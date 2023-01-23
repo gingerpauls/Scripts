@@ -1,0 +1,75 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "AudioDevice/1.0.0": {
+        "dependencies": {
+          "AudioDeviceCmdlets": "1.0.0"
+        },
+        "runtime": {
+          "AudioDevice.dll": {}
+        }
+      },
+      "AudioDeviceCmdlets/1.0.0": {
+        "runtime": {
+          "AudioDeviceCmdlets.dll": {}
+        }
+      },
+      "System.Management.Automation/3.0.0.0": {
+        "runtime": {
+          "System.Management.Automation.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Microsoft.Management.Infrastructure/1.0.0.0": {
+        "runtime": {
+          "Microsoft.Management.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Microsoft.Management.Infrastructure.Native/1.0.0.0": {
+        "runtime": {
+          "Microsoft.Management.Infrastructure.Native.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AudioDevice/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AudioDeviceCmdlets/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Management.Automation/3.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Management.Infrastructure/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Management.Infrastructure.Native/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
