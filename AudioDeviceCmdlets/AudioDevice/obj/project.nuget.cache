@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "p4xHCo52hLbgkWf48yzlE9kMN1l94rUafSc2LF655iPSUenaJ9J3hvmaBNdB4Xwu/7QpalSeHlDzNIqdRNBsgA==",
+  "dgSpecHash": "eSzvuhAqhKsTuJStXE0RNfsTWHvTd5kWm7CNV+7/if3egN/3oyGjcuo66rz6BsL+wtQtun3U1A+W49vAzpy1yg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\jorda\\Desktop\\AudioDeviceCmdlets\\AudioDevice\\AudioDevice.csproj",
+  "projectFilePath": "C:\\Users\\jorda\\Desktop\\Scripts\\AudioDeviceCmdlets\\AudioDevice\\AudioDevice.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

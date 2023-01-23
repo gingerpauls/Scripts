@@ -1,0 +1,8 @@
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.pdb
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\clrcompression.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\clrjit.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\coreclr.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\mscordaccore.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDeviceCmdlets.pdb
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\System.Management.Automation.xml
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\AudioDevice\bin\Release\net5.0\publish\AudioDevice.exe

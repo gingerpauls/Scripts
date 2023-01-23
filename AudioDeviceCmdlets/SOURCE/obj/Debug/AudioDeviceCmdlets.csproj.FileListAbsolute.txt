@@ -9,3 +9,14 @@ C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Debug\AudioDeviceCmdlets.dl
 C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\bin\Debug\AudioDeviceCmdlets.pdb
 C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.dll
 C:\Users\jorda\Desktop\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.pdb
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\AudioDeviceCmdlets.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\AudioDeviceCmdlets.pdb
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\System.Management.Automation.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\Microsoft.Management.Infrastructure.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\Microsoft.Management.Infrastructure.Native.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\bin\Debug\System.Management.Automation.xml
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.csprojAssemblyReference.cache
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.csproj.CoreCompileInputs.cache
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.csproj.CopyComplete
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.dll
+C:\Users\jorda\Desktop\Scripts\AudioDeviceCmdlets\SOURCE\obj\Debug\AudioDeviceCmdlets.pdb
