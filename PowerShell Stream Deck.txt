@@ -1,3 +1,16 @@
 cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive <path to your powershell script>\<your power shell script name>.ps1 'param1' 'param3' 'param3'
 
 cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive D:\Scripts\DisplaySettings.ps1
+
+
+powershell <path to your script>\<your power shell script name>.ps1 'param1' 'param3' 'param3'
+
+powershell C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
+
+
+C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts
+
+
+C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
+
+cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1

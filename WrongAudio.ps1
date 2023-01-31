@@ -113,3 +113,4 @@ echo ""
 echo "" 
 echo "" 
 $StopWatch.Elapsed
+Read-Host -Prompt "Press Enter to exit"
