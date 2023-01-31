@@ -1,0 +1,3 @@
+ms-settings:system
+ms-settings:display
+ms-settings:apps-volume

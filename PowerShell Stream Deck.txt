@@ -5,7 +5,7 @@ cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -non
 
 powershell <path to your script>\<your power shell script name>.ps1 'param1' 'param3' 'param3'
 
-powershell C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
+powershell C:\Users\paul.hutchinson\Music^ Tribe\Scripts\Scripts\WrongAudio.ps1
 
 
 C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts
@@ -13,4 +13,7 @@ C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts
 
 C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
 
-cmd /c start /min "" powershell -WindowStyle Hidden -executionpolicy bypass -noninteractive C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
+cmd /c start "" powershell -WindowStyle Hidden -executionpolicy bypass C:\Users\paul.hutchinson\Music Tribe\Scripts\Scripts\WrongAudio.ps1
+
+
+cmd /c start ms-settings:app-vol
