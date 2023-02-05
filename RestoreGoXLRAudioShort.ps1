@@ -1,7 +1,4 @@
-cls
-$StopWatch = [system.diagnostics.stopwatch]::startNew()
-
-
+echo "Fixing GoXLR Audio. Please wait ..."
 [System.Collections.ArrayList]$tcPlaybackDevices = Get-AudioDevice -List | where {($_.Type -eq "Playback")} | where name -like "*TC-Helicon*"
 [System.Collections.ArrayList]$tcRecordingDevices = Get-AudioDevice -List | where {($_.Type -eq "Recording")} | where name -like "*TC-Helicon*"
 
@@ -30,5 +27,3 @@ for ( $index = 0; $index -lt $tcRecordingDevices.count; $index++ ) {
 Get-AudioDevice -List | where Type -like "Playback" | where name -like "*System*TC-Helicon*"  | Set-AudioDevice -Verbose -DefaultOnly | Out-Null
 Get-AudioDevice -List | where Type -like "Playback" | where name -like "*Chat*TC-Helicon*"  | Set-AudioDevice -Verbose -CommunicationOnly | Out-Null
 Get-AudioDevice -List | where Type -like "Recording" | where name -like "*Mic*TC-Helicon*"  | Set-AudioDevice -Verbose | Out-Null
-
-$StopWatch.Elapsed
