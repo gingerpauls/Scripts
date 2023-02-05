@@ -123,3 +123,16 @@ Git User Mailing List
 comments
 
 
+JORDAN HELP
+
+*this does not lose commits**
+
+push some buillshit - this is a commit
+reverted "some buillshit" - this is a commit
+
+OR
+
+** this loses commits**
+move local branch before pushed some buillshit
+force push to force origin to go local branch is
+
