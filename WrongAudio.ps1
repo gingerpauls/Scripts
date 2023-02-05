@@ -1,8 +1,14 @@
 #Sets random mute, and volume to all audio devices (playback and recording)
+
+[console]::WindowWidth=40; 
+[console]::WindowHeight=2; 
+[console]::BufferWidth=[console]::WindowWidth
+
+#separate into playback and recording lists
 [System.Collections.ArrayList]$playbackDevices = Get-AudioDevice -List | where {($_.Type -eq "Playback")}
 [System.Collections.ArrayList]$recordingDevices = Get-AudioDevice -List | where {($_.Type -eq "Recording")}
 
-
+echo "Randomizing all enabled audio devices..."
 #set playbackDevices
 for ( $index = 0; $index -lt $playbackDevices.count; $index++ ) {
 	$randVol = Get-Random -Maximum 100
