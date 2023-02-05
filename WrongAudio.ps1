@@ -1,3 +1,4 @@
+cls
 $StopWatch = [system.diagnostics.stopwatch]::startNew()
 #Sets random mute, and volume to all audio devices (playback and recording)
 
@@ -31,46 +32,46 @@ for ( $index = 0; $index -lt $recordingDevices.count; $index++ ) {
 }
 
 #get playbackDevices
-echo ""
-echo "Playback Devices"
-echo ""
+# echo ""
+# echo "Playback Devices"
+# echo ""
 
-for ( $index = 0; $index -lt $playbackDevices.count; $index++ ) {
+# for ( $index = 0; $index -lt $playbackDevices.count; $index++ ) {
 	
-	Set-AudioDevice -ID $playbackDevices[$index].id | Out-Null
-	echo $playbackDevices[$index].name
+# 	Set-AudioDevice -ID $playbackDevices[$index].id | Out-Null
+# 	echo $playbackDevices[$index].name
 	
-	Write-Host -NoNewline "Vol: "
-	Get-AudioDevice -PlaybackVolume | Write-Host -NoNewline
-	Write-Host -NoNewline " / Mute: "
-	Get-AudioDevice -PlaybackMute | Write-Host -NoNewline
-	Write-Host -NoNewline " / ComVol: "
-	Get-AudioDevice -PlaybackCommunicationVolume | Write-Host -NoNewline
-	Write-Host -NoNewline " / ComMute: "
-	Get-AudioDevice -PlaybackCommunicationMute | Write-Host
+# 	Write-Host -NoNewline "Vol: "
+# 	Get-AudioDevice -PlaybackVolume | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / Mute: "
+# 	Get-AudioDevice -PlaybackMute | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / ComVol: "
+# 	Get-AudioDevice -PlaybackCommunicationVolume | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / ComMute: "
+# 	Get-AudioDevice -PlaybackCommunicationMute | Write-Host
 
-}
+# }
 
 #get recordingDevices
-echo ""
-echo "Recording Devices:"
-echo ""
+# echo ""
+# echo "Recording Devices:"
+# echo ""
 
-for ( $index = 0; $index -lt $recordingDevices.count; $index++ ) {
+# for ( $index = 0; $index -lt $recordingDevices.count; $index++ ) {
 	
-	Set-AudioDevice -ID $recordingDevices[$index].id  | Out-Null
-	echo $recordingDevices[$index].name
+# 	Set-AudioDevice -ID $recordingDevices[$index].id  | Out-Null
+# 	echo $recordingDevices[$index].name
 	
-	Write-Host -NoNewline "Vol: "
-	Get-AudioDevice -RecordingVolume | Write-Host -NoNewline
-	Write-Host -NoNewline " / Mute: "
-	Get-AudioDevice -RecordingMute | Write-Host -NoNewline
-	Write-Host -NoNewline " / ComVol: "
-	Get-AudioDevice -RecordingCommunicationVolume | Write-Host -NoNewline
-	Write-Host -NoNewline " / ComMute: "
-	Get-AudioDevice -RecordingCommunicationMute | Write-Host
+# 	Write-Host -NoNewline "Vol: "
+# 	Get-AudioDevice -RecordingVolume | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / Mute: "
+# 	Get-AudioDevice -RecordingMute | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / ComVol: "
+# 	Get-AudioDevice -RecordingCommunicationVolume | Write-Host -NoNewline
+# 	Write-Host -NoNewline " / ComMute: "
+# 	Get-AudioDevice -RecordingCommunicationMute | Write-Host
 
-}
+# }
 
 #set random playback and recording devices
 $x = $playbackDevices.count
@@ -90,9 +91,9 @@ $randRecDev = Get-Random -Maximum $y
 Set-AudioDevice -ID $recordingDevices[$randRecDev].id -CommunicationOnly | Out-Null
 Set-AudioDevice -ID $playbackDevices[$randPlayDev].id -CommunicationOnly| Out-Null
 
-echo "" 
-echo "" 
-echo "" 
+# echo "" 
+# echo "" 
+# echo "" 
 
 # display and save current defaults 
 $currPlay = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Playback")}

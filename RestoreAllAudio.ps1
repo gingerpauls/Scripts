@@ -1,3 +1,4 @@
+cls
 $StopWatch = [system.diagnostics.stopwatch]::startNew()
 #install AudioDeviceCmdlets
 #Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser
