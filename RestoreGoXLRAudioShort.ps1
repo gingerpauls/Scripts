@@ -1,11 +1,10 @@
-echo "Fixing GoXLR Audio. Please wait ..."
 [System.Collections.ArrayList]$tcPlaybackDevices = Get-AudioDevice -List | where {($_.Type -eq "Playback")} | where name -like "*TC-Helicon*"
 [System.Collections.ArrayList]$tcRecordingDevices = Get-AudioDevice -List | where {($_.Type -eq "Recording")} | where name -like "*TC-Helicon*"
 
+$maxVol = 100
+$unmute = 0
+
 for ( $index = 0; $index -lt $tcPlaybackDevices.count; $index++ ) {
-	
-	$maxVol = 100
-	$unmute = 0
 
 	Set-AudioDevice -ID $tcPlaybackDevices[$index].id | Out-Null
 	Set-AudioDevice -PlaybackVolume $maxVol
@@ -14,9 +13,6 @@ for ( $index = 0; $index -lt $tcPlaybackDevices.count; $index++ ) {
 }
 
 for ( $index = 0; $index -lt $tcRecordingDevices.count; $index++ ) {
-	
-	$maxVol = 100
-	$unmute = 0
 
 	Set-AudioDevice -ID $tcRecordingDevices[$index].id  | Out-Null
 	Set-AudioDevice -RecordingVolume $maxVol
