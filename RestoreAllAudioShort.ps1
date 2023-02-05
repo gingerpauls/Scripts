@@ -1,6 +1,8 @@
+cls
 $StopWatch = [system.diagnostics.stopwatch]::startNew()
 #install AudioDeviceCmdlets
 #Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser
+control mmsys.cpl sounds
 
 # display and save current defaults 
 $currPlay = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Playback")}
