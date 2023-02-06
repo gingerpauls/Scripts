@@ -17,6 +17,6 @@ for ( $index = 0; $index -lt $tcDevices.count; $index++ ) {
 	Set-AudioDevice -RecordingMute $unmute
 }
 
-$tcDevices | where Type -like "Playback" | where name -like "*System*TC-Helicon*"  | Set-AudioDevice -Verbose -DefaultOnly #| Out-Null
-$tcDevices | where Type -like "Playback" | where name -like "*Chat*TC-Helicon*"  | Set-AudioDevice -Verbose -CommunicationOnly #| Out-Null
-$tcDevices | where Type -like "Recording" | where name -like "*Mic*TC-Helicon*"  | Set-AudioDevice -Verbose #| Out-Null
+$tcDevices | where Type -like "Playback" | where name -like "*System*TC-Helicon*"  | Set-AudioDevice -Verbose -DefaultOnly | Out-Null
+$tcDevices | where Type -like "Playback" | where name -like "*Chat*TC-Helicon*"  | Set-AudioDevice -Verbose -CommunicationOnly | Out-Null
+$tcDevices | where Type -like "Recording" | where name -like "*Mic*TC-Helicon*"  | Set-AudioDevice -Verbose | Out-Null

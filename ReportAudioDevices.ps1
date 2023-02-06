@@ -73,17 +73,4 @@ Set-AudioDevice -ID $currPlayComm.id -CommunicationOnly | Out-Null
 Set-AudioDevice -ID $currRec.id -DefaultOnly | Out-Null
 Set-AudioDevice -ID $currRecComm.id -CommunicationOnly| Out-Null
 
-echo ""
-# display and save current defaults 
-# $currPlay = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Playback")}
-# $currPlayComm = Get-AudioDevice -List | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Playback")}
-# $currRec = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Recording")}
-# $currRecComm = Get-AudioDevice -List | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Recording")}
-
-# display current defaults
-# echo "Current Default Playback Device: " $currPlay.name
-# echo "Current Default Playback Communication Device: " $currPlayComm.name 
-# echo "Current Default Recording Device: " $currRec.name 
-# echo "Current Default Recording Communication Device: " $currRecComm.name 
-# echo ""
 Read-Host -Prompt "Press Enter to exit"
