@@ -4,17 +4,16 @@
 
 echo "Restoring all audio ..."
 
-# display and save current defaults 
-$currPlay = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Playback")}
-$currPlayComm = Get-AudioDevice -List | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Playback")}
-$currRec = Get-AudioDevice -List | where {($_.Default -eq "True") -and ($_.Type -eq "Recording")}
-$currRecComm = Get-AudioDevice -List | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Recording")}
-
 [System.Collections.ArrayList]$audioDevices = Get-AudioDevice -List
+
+# display and save current defaults 
+$currPlay = $audioDevices | where {($_.Default -eq "True") -and ($_.Type -eq "Playback")}
+$currPlayComm = $audioDevices | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Playback")}
+$currRec = $audioDevices | where {($_.Default -eq "True") -and ($_.Type -eq "Recording")}
+$currRecComm = $audioDevices | where {($_.DefaultCommunication -eq "True") -and ($_.Type -eq "Recording")}
 
 #set audioDevices
 for ( $index = 0; $index -lt $audioDevices.count; $index++ ) {
-	
 	$maxVol = 100
 	$unmute = 0
 
