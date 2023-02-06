@@ -133,6 +133,10 @@ reverted "some buillshit" - this is a commit
 OR
 
 ** this loses commits**
+right-click commit you want
+select 'reset main to this commit'
+select 'hard' (will delete everything)
 move local branch before pushed some buillshit
 force push to force origin to go local branch is
-
+ctrl + b (makes new branch)
+force push (need to type 'push origin main --force')
