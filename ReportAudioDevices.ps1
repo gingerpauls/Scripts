@@ -1,4 +1,3 @@
-cls
 [console]::WindowWidth=60; 
 [console]::WindowHeight=50; 
 [console]::BufferWidth=[console]::WindowWidth
@@ -18,7 +17,6 @@ echo "Current Playback Devices"
 echo ""
 
 for ( $index = 0; $index -lt $audioDevices.count; $index++ ) {
-	
 	Set-AudioDevice -ID $audioDevices[$index].id | Out-Null
 	if($audioDevices[$index].type -eq "Playback"){
 		if($audioDevices[$index].name -eq $currPlay.name){
@@ -29,6 +27,7 @@ for ( $index = 0; $index -lt $audioDevices.count; $index++ ) {
 		}
 		echo $audioDevices[$index].name
 		Write-Host -NoNewline "Vol: "
+		# echo ([math]::Round($audioDevices[$index].Device.AudioEndPointVolume.MasterVolumeLevelScalar * 100))
 		Get-AudioDevice -PlaybackVolume | Write-Host -NoNewline
 		Write-Host -NoNewline " / Mute: "
 		Get-AudioDevice -PlaybackMute | Write-Host -NoNewline
@@ -55,13 +54,13 @@ for ( $index = 0; $index -lt $audioDevices.count; $index++ ) {
 		}
 		echo $audioDevices[$index].name
 		Write-Host -NoNewline "Vol: "
-		Get-AudioDevice -RecordingVolume | Write-Host -NoNewline
+		# Get-AudioDevice -RecordingVolume | Write-Host -NoNewline
 		Write-Host -NoNewline " / Mute: "
-		Get-AudioDevice -RecordingMute | Write-Host -NoNewline
+		# Get-AudioDevice -RecordingMute | Write-Host -NoNewline
 		Write-Host -NoNewline " / ComVol: "
-		Get-AudioDevice -RecordingCommunicationVolume | Write-Host -NoNewline
+		# Get-AudioDevice -RecordingCommunicationVolume | Write-Host -NoNewline
 		Write-Host -NoNewline " / ComMute: "
-		Get-AudioDevice -RecordingCommunicationMute | Write-Host
+		# Get-AudioDevice -RecordingCommunicationMute | Write-Host
 	}
 
 	
@@ -73,4 +72,7 @@ Set-AudioDevice -ID $currPlayComm.id -CommunicationOnly | Out-Null
 Set-AudioDevice -ID $currRec.id -DefaultOnly | Out-Null
 Set-AudioDevice -ID $currRecComm.id -CommunicationOnly| Out-Null
 
-Read-Host -Prompt "Press Enter to exit"
+
+# Read-Host -Prompt "Press Enter to exit"
+
+
