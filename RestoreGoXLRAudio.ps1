@@ -1,8 +1,9 @@
-[console]::WindowWidth=30; 
-[console]::WindowHeight=2; 
-[console]::BufferWidth=[console]::WindowWidth
 
-echo "Fixing GoXLR Audio..."
+# [console]::WindowWidth=60; 
+# [console]::WindowHeight=50; 
+# [console]::BufferWidth=[console]::WindowWidth
+
+echo "Restoring GoXLR audio devices..."
 
 [System.Collections.ArrayList]$tcDevices = Get-AudioDevice -List | where name -like "*TC-Helicon*"
 

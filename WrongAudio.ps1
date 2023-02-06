@@ -1,8 +1,8 @@
 #Sets random mute, and volume to all audio devices (playback and recording)
 
-[console]::WindowWidth=40; 
-[console]::WindowHeight=2; 
-[console]::BufferWidth=[console]::WindowWidth
+# [console]::WindowWidth=60; 
+# [console]::WindowHeight=50; 
+# [console]::BufferWidth=[console]::WindowWidth
 
 #separate into playback and recording lists
 [System.Collections.ArrayList]$audioDevices = Get-AudioDevice -List

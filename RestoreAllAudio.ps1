@@ -1,8 +1,9 @@
-[console]::WindowWidth=30; 
-[console]::WindowHeight=2; 
-[console]::BufferWidth=[console]::WindowWidth
 
-echo "Restoring all audio ..."
+# [console]::WindowWidth=60; 
+# [console]::WindowHeight=50; 
+# [console]::BufferWidth=[console]::WindowWidth
+
+echo "Restoring all audio devices ..."
 
 [System.Collections.ArrayList]$audioDevices = Get-AudioDevice -List
 
