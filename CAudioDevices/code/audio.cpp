@@ -4,8 +4,27 @@
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+struct DeviceInfo {
+	LPWSTR Id;
+	LPWSTR Name;
+
+	// Volume
+	float VolumeScalar;
+	float VolumeLevel;
+	BOOL IsMute;
+
+	// Device flags
+	EDataFlow DataFlow;
+	BOOL IsDefaultPlayback;
+	BOOL IsDefaultCommunicationPlayback;
+	BOOL IsDefaultRecording;
+	BOOL IsDefaultCommunicationRecording;
+};
+
 struct Device
 {
+	DeviceInfo Info;
+
     IMMDevice* Device;
     IPropertyStore* PropertyStore;
     IAudioEndpointVolume* AudioEndpointVolume;
@@ -19,6 +38,31 @@ static LPWSTR defaultPlayback;
 static LPWSTR defaultCommunicationPlayback;
 static LPWSTR defaultRecording;
 static LPWSTR defaultCommunicationRecording;
+
+static void PopulateInfo(Device* device)
+{
+	device->Device->GetId(&device->Info.Id);
+
+	PROPVARIANT varProperty;
+	device->PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
+	device->Info.Name = varProperty.pwszVal;
+
+	device->Endpoint->GetDataFlow(&device->Info.DataFlow);
+
+	device->AudioEndpointVolume->GetMasterVolumeLevelScalar(&device->Info.VolumeScalar);
+	device->AudioEndpointVolume->GetMasterVolumeLevel(&device->Info.VolumeLevel);
+	device->AudioEndpointVolume->GetMute(&device->Info.IsMute);
+
+	if (lstrcmpW(device->Info.Id, defaultPlayback) == 0)
+		device->Info.IsDefaultPlayback = TRUE;
+	if (lstrcmpW(device->Info.Id, defaultCommunicationPlayback) == 0)
+		device->Info.IsDefaultCommunicationPlayback = TRUE;
+
+	if (lstrcmpW(device->Info.Id, defaultRecording) == 0)
+		device->Info.IsDefaultRecording = TRUE;
+	if (lstrcmpW(device->Info.Id, defaultCommunicationRecording) == 0)
+		device->Info.IsDefaultCommunicationRecording = TRUE;
+}
 
 static void InitializeAllDevices(void)
 {
@@ -38,16 +82,16 @@ static void InitializeAllDevices(void)
         return;
 
     IMMDevice* tempDevice;
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &tempDevice);
+    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &tempDevice);
     tempDevice->GetId(&defaultPlayback);
 
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &tempDevice);
+    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &tempDevice);
     tempDevice->GetId(&defaultCommunicationPlayback);
     
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &tempDevice);
+    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &tempDevice);
     tempDevice->GetId(&defaultRecording);
 
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &tempDevice);
+    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &tempDevice);
     tempDevice->GetId(&defaultCommunicationRecording);
 
     Device* currDevice = AllDevices;
@@ -58,80 +102,93 @@ static void InitializeAllDevices(void)
         currDevice->Device->OpenPropertyStore(STGM_READ, &currDevice->PropertyStore);
         currDevice->Device->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&currDevice->AudioEndpointVolume);
         currDevice->Device->QueryInterface(__uuidof(IMMEndpoint), (void**)&currDevice->Endpoint);
+
+		PopulateInfo(currDevice);
+
         currDevice++;
     }
+}
+
+static char* BoolToString(BOOL _bool)
+{
+	if (_bool)
+		return "True";
+	return "False";
+}
+
+static void PrintInfo(DeviceInfo* info)
+{
+	printf("%ls\n", info->Name);
+	printf("\tVolume: %f\n", info->VolumeScalar);
+	printf("\tLevel: %f\n", info->VolumeLevel);
+	printf("\tIsMute: %s\n", BoolToString(info->IsMute));
+
+	char* flowString;
+	if (info->DataFlow == EDataFlow::eCapture)
+		flowString = "Recording";
+	if (info->DataFlow == EDataFlow::eRender)
+		flowString = "Playback";
+	printf("\tType: %s\n", flowString);
+
+	//TODO abstract this?
+	if (info->DataFlow == EDataFlow::eCapture)
+	{
+		printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultRecording));
+		printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationRecording));
+	}
+
+	if (info->DataFlow == EDataFlow::eRender)
+	{
+		printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultPlayback));
+		printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationPlayback));
+	}
+	printf("\n");
+}
+
+static void PrintAllDevices()
+{
+	printf("------------ Playback Devices ------------\n");
+	for (int i = 0; i < NumDevices; i++) {
+		if (AllDevices[i].Info.DataFlow != EDataFlow::eRender)
+			continue;
+
+		PrintInfo(&AllDevices[i].Info);
+	}
+
+	printf("------------ Recording Devices ------------\n");
+	for (int i = 0; i < NumDevices; i++) {
+		if (AllDevices[i].Info.DataFlow != EDataFlow::eCapture)
+			continue;
+
+		PrintInfo(&AllDevices[i].Info);
+	}
 }
 
 int main(int numArguments, char* arguments[])
 {
     CoInitialize(NULL);
     InitializeAllDevices();
+	PrintAllDevices();
 
-    for (int i = 0; i < numArguments; i++)
-    {
-        
-    }
+	/*
+	playback volume
+	recording volume
 
-    for (int i = 0; i < NumDevices; i++)
-    {
-        Device currDevice = AllDevices[i];
+	playback mute
+	recording mute
 
-        PROPVARIANT varProperty;
-        EDataFlow dataFlow;
-        ERole role;
-        float volumeScalar;
-        float volumeLevel;
-        BOOL isMute;
-        LPWSTR id;
+	set volume
+	set default
+	set mute
+	*/
 
-        currDevice.Endpoint->GetDataFlow(&dataFlow);
-        currDevice.PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
-        currDevice.AudioEndpointVolume->GetMasterVolumeLevelScalar(&volumeScalar);
-        currDevice.AudioEndpointVolume->GetMasterVolumeLevel(&volumeLevel);
-        currDevice.AudioEndpointVolume->GetMute(&isMute);
-        currDevice.Device->GetId(&id);
+	/*
+	all devices unmute and max volume
 
-        char* deviceDefault;
-        char* flow;
-        if (dataFlow == EDataFlow::eCapture)
-        {
-            flow = "Playback";
-            if (lstrcmpW(id, defaultCommunicationPlayback) == 0 && lstrcmpW(id, defaultPlayback) == 0)
-                deviceDefault = "Playback Default and Default Communications";
-            else if (lstrcmpW(id, defaultCommunicationPlayback) == 0)
-                deviceDefault = "Playback Default Communications";
-            else if (lstrcmpW(id, defaultPlayback) == 0)
-                deviceDefault = "Playback Default";
-            else 
-				deviceDefault = "";
-        }
-        else if (dataFlow == EDataFlow::eRender)
-        {
-            flow = "Recording";
-            if (lstrcmpW(id, defaultRecording) == 0 && lstrcmpW(id, defaultCommunicationRecording) == 0)
-                deviceDefault = "Recording Default and Default Communications";
-            else if (lstrcmpW(id, defaultCommunicationRecording) == 0)
-                deviceDefault = "Recording Default Communications";
-            else if (lstrcmpW(id, defaultRecording) == 0)
-                deviceDefault = "Recording Default";
-            else 
-				deviceDefault = "";
-        }
-        else
-        {
-            flow = "Unknown";
-            deviceDefault = "Unknown";
-        }
+	TC Helicon unmute and max volume
 
-        char* muted;
-        if (isMute)
-            muted = "true";
-        else
-            muted = "false";
-
-
-        printf("Name: %ls\nVolume: %f\nLevel: %f\nDataFlow: %s\nIsMute: %s\nDetails: %s\n\n", varProperty.pwszVal, volumeScalar, volumeLevel, flow, muted, deviceDefault);
-    }
+	randomize all mute and volume
+	*/
 
 	return 0;
 }
