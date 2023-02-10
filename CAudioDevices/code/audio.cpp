@@ -197,6 +197,38 @@ static void RandomizeAllDevices()
 	}
 }
 
+
+static void SetDefaultDevicesWhere(ERole role, EDataFlow dataFlow, const wchar_t* pattern)
+{
+	for (int i = 0; i < NumDevices; i++)
+	{
+		Device* device = &AllDevices[i];
+
+		if (!match(pattern, device->Info.Name, 0, 0) || device->Info.DataFlow != dataFlow)
+			continue;
+
+		PolicyConfig->SetDefaultEndpoint(device->Info.Id, role);
+	}
+}
+
+static void SetAstroDevices()
+{
+	SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, L"*Astro*Game*");
+	SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, L"*Astro*Voice*");
+
+	SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, L"*Astro*Voice*");
+	SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, L"*Astro*Voice*");
+}
+
+static void SetTCHeliconDevices()
+{
+	SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, L"*System*TC-Helicon*");
+	SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, L"*Chat*TC-Helicon*");
+
+	SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, L"*Mic*TC-Helicon*");
+	SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, L"*Mic*TC-Helicon*");
+}
+
 static char* BoolToString(BOOL _bool)
 {
 	if (_bool)
@@ -265,19 +297,43 @@ int main(int numArguments, char* arguments[])
 
 	wchar_t clause[100];
 
-	if (numArguments >= 2 && strcmp(arguments[1], "-l") == 0)
+	if (numArguments == 2)
 	{
-		PrintAllDevices();
+		if (strcmp(arguments[1], "-l") == 0)
+		{
+			PrintAllDevices();
+		}
+		else if (strcmp(arguments[1], "-Astro") == 0)
+		{
+			SetAstroDevices();
+		}
+		else if (strcmp(arguments[1], "-TC") == 0)
+		{
+			SetTCHeliconDevices();
+		}
+		else
+		{
+			printf("Unknown arguments...");
+		}
 	}
-	else if (numArguments >= 3 && strcmp(arguments[1], "-m") == 0)
-	{ // Mute all matching devices
-		swprintf(clause, 100, L"%hs", arguments[2]);
-		SetDevicesWhere(0.0, TRUE, clause);
+	else if (numArguments == 3)
+	{
+		if (strcmp(arguments[1], "-u") == 0)
+		{
+			// Unmute all matching devices
+			swprintf(clause, 100, L"%hs", arguments[2]);
+			SetDevicesWhere(1.0, FALSE, clause);
+		}
+		else if (strcmp(arguments[1], "-m") == 0)
+		{
+			// Mute all matching devices
+			swprintf(clause, 100, L"%hs", arguments[2]);
+			SetDevicesWhere(0.0, TRUE, clause);
+		}
 	}
-	else if (numArguments >= 3 && strcmp(arguments[1], "-u") == 0)
-	{ // Unmute all matching devices
-		swprintf(clause, 100, L"%hs", arguments[2]);
-		SetDevicesWhere(1.0, FALSE, clause);
+	else
+	{
+		printf("Unknown arguments...");
 	}
 
 	return 0;
