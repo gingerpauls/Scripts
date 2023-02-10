@@ -152,6 +152,23 @@ static void SetAllDevices(float volumeScalar, BOOL mute)
 	}
 }
 
+static void RandomizeAllDevices()
+{
+	srand(time(NULL));
+	
+	for (int i = 0; i < NumDevices; i++)
+	{
+		Device* device = &AllDevices[i];
+
+		float randomScalar = (float)rand() / (float)(RAND_MAX);
+		float randomMute = (float)rand() / (float)(RAND_MAX);
+		BOOL mute = randomMute >= 0.5;
+
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(randomScalar, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
+	}
+}
+
 static char* BoolToString(BOOL _bool)
 {
 	if (_bool)
@@ -216,12 +233,15 @@ static void PrintAllDevices()
 int main(int numArguments, char* arguments[])
 {
     CoInitialize(NULL);
-	srand(time(NULL));
 
 	InitializeAndPopulateAllDevices();
 	PrintAllDevices();
 
 	SetAllDevices(0.0, TRUE);
+	PopulateAllDevices();
+	PrintAllDevices();
+	
+	RandomizeAllDevices();
 	PopulateAllDevices();
 	PrintAllDevices();
 
