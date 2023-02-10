@@ -34,16 +34,21 @@ struct Device
     IMMEndpoint* Endpoint;
 };
 
+struct DefaultDevices {
+	LPWSTR Playback;
+	LPWSTR CommunicationPlayback;
+
+	LPWSTR Recording;
+	LPWSTR CommunicationRecording;
+};
+
 static UINT NumDevices;
 static Device* AllDevices;
+
+IMMDeviceEnumerator* DeviceEnumerator;
 IPolicyConfig* PolicyConfig;
 
-static LPWSTR defaultPlayback;
-static LPWSTR defaultCommunicationPlayback;
-static LPWSTR defaultRecording;
-static LPWSTR defaultCommunicationRecording;
-
-static void PopulateInfo(Device* device)
+static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 {
 	device->Device->GetId(&device->Info.Id);
 
@@ -57,43 +62,41 @@ static void PopulateInfo(Device* device)
 	device->AudioEndpointVolume->GetMasterVolumeLevel(&device->Info.VolumeLevel);
 	device->AudioEndpointVolume->GetMute(&device->Info.IsMute);
 
-	if (lstrcmpW(device->Info.Id, defaultPlayback) == 0)
+	if (lstrcmpW(device->Info.Id, defaultDevices->Playback) == 0)
 		device->Info.IsDefaultPlayback = TRUE;
-	if (lstrcmpW(device->Info.Id, defaultCommunicationPlayback) == 0)
+	if (lstrcmpW(device->Info.Id, defaultDevices->CommunicationPlayback) == 0)
 		device->Info.IsDefaultCommunicationPlayback = TRUE;
 
-	if (lstrcmpW(device->Info.Id, defaultRecording) == 0)
+	if (lstrcmpW(device->Info.Id, defaultDevices->Recording) == 0)
 		device->Info.IsDefaultRecording = TRUE;
-	if (lstrcmpW(device->Info.Id, defaultCommunicationRecording) == 0)
+	if (lstrcmpW(device->Info.Id, defaultDevices->CommunicationRecording) == 0)
 		device->Info.IsDefaultCommunicationRecording = TRUE;
 }
 
-static void InitializeDefaultDevices(IMMDeviceEnumerator* deviceEnumerator)
+static void InitializeDefaultDevices(DefaultDevices* defaultDevices)
 {
-	IMMDevice* tempDevice;
-	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &tempDevice);
-	tempDevice->GetId(&defaultPlayback);
+	IMMDevice* device;
+	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
+	device->GetId(&defaultDevices->Playback);
 
-	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &tempDevice);
-	tempDevice->GetId(&defaultCommunicationPlayback);
+	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
+	device->GetId(&defaultDevices->CommunicationPlayback);
 
-	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &tempDevice);
-	tempDevice->GetId(&defaultRecording);
+	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device);
+	device->GetId(&defaultDevices->Recording);
 
-	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &tempDevice);
-	tempDevice->GetId(&defaultCommunicationRecording);
+	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &device);
+	device->GetId(&defaultDevices->CommunicationRecording);
 }
 
 static void PopulateAllDevices(void)
 {
-	IMMDeviceEnumerator* deviceEnumerator = NULL;
-	CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
-
-	InitializeDefaultDevices(deviceEnumerator);
+	DefaultDevices defaultDevices;
+	InitializeDefaultDevices(&defaultDevices);
 
 	for (int i = 0; i < NumDevices; i++)
 	{
-		PopulateInfo(&AllDevices[i]);
+		PopulateInfo(&AllDevices[i], &defaultDevices);
 	}
 }
 
@@ -102,12 +105,11 @@ static void InitializeAllDevices(void)
     int MaxDevices = 256;
     AllDevices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
 
-    IMMDeviceEnumerator* deviceEnumerator = NULL;
-    CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
+    CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&DeviceEnumerator));
 	CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
-    deviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
+	DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
 
     UINT count;
     deviceCollectionPtr->GetCount(&count);
@@ -163,6 +165,7 @@ static void PrintInfo(DeviceInfo* info)
 		printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultPlayback));
 		printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationPlayback));
 	}
+
 	printf("\n");
 }
 
