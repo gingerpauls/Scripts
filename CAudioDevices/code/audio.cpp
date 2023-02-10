@@ -37,7 +37,7 @@ int main(int numArguments, char* arguments[])
     UINT count;
     if (!SUCCEEDED(deviceCollectionPtr->GetCount(&count)))
     {
-        printf("Failed to get count of deivces in device collection.");
+        printf("Failed to get count of devices in device collection.");
         return 1;
     }
 
@@ -60,7 +60,11 @@ int main(int numArguments, char* arguments[])
         float volumeScalar;
         float level;
         volume->GetMasterVolumeLevelScalar(&volumeScalar);
+        volumeScalar = volumeScalar * 100;
         volume->GetMasterVolumeLevel(&level);
+        //printf("Name: %ls\n\tVolume: %f\n\n", varProperty.pwszVal, volumeScalar);
+        //volume->SetMasterVolumeLevelScalar(1.0,&GUID_NULL);
+        //volume->GetMasterVolumeLevelScalar(&volumeScalar);
 
         printf("Name: %ls\n\tVolume: %f\n\tLevel: %f\n\n", varProperty.pwszVal, volumeScalar, level);
     }
