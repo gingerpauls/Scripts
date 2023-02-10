@@ -184,24 +184,6 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 	}
 }
 
-static void RandomizeAllDevices()
-{
-	srand(time(NULL));
-	
-	for (int i = 0; i < NumDevices; i++)
-	{
-		Device* device = &AllDevices[i];
-
-		float randomScalar = (float)rand() / (float)(RAND_MAX);
-		float randomMute = (float)rand() / (float)(RAND_MAX);
-		BOOL mute = randomMute >= 0.5;
-
-		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(randomScalar, &GUID_NULL);
-		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
-	}
-}
-
-
 static bool SetDefaultDevicesWhere(ERole role, EDataFlow dataFlow, const wchar_t* pattern)
 {
 	bool flag = false;
@@ -218,6 +200,32 @@ static bool SetDefaultDevicesWhere(ERole role, EDataFlow dataFlow, const wchar_t
 	}
 
 	return flag;
+}
+
+static void RandomizeAllDevices()
+{
+	srand(time(NULL));
+
+	for (int i = 0; i < NumDevices; i++)
+	{
+		Device* device = &AllDevices[i];
+
+		float randomScalar = (float)rand() / (float)(RAND_MAX);
+		float randomMute = (float)rand() / (float)(RAND_MAX);
+		BOOL mute = randomMute >= 0.5;
+
+		float randomDefault = (float)rand() / (float)(RAND_MAX);
+
+		float randomDefaultCommunication = (float)rand() / (float)(RAND_MAX);
+
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(randomScalar, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
+
+		if (randomDefault < 0.25)
+			SetDefaultDevicesWhere(ERole::eMultimedia, device->Info.DataFlow, device->Info.Name);
+		if (randomDefaultCommunication < 0.25)
+			SetDefaultDevicesWhere(ERole::eCommunications, device->Info.DataFlow, device->Info.Name);
+	}
 }
 
 static void SetAstroDevices()
@@ -241,6 +249,9 @@ static void SetAstroDevices()
 		printf("Set Astro Default Recording Communication Device\n");
 	else
 		printf("Unable to find Astro Recording Communication Device. Did not set Default Recording Communication Device.\n");
+
+	SetDevicesWhere(1.0, FALSE, L"*Astro*Game*", false);
+	SetDevicesWhere(1.0, FALSE, L"*Astro*Voice*", false);
 }
 
 static void SetTCHeliconDevices()
@@ -264,6 +275,10 @@ static void SetTCHeliconDevices()
 		printf("Set TC-Helicon Default Recording Communication Device\n");
 	else
 		printf("Unable to find TC-Helicon Recording Communication Device. Did not set Default Recording Communication Device.\n");
+
+	SetDevicesWhere(1.0, FALSE, L"*System*TC-Helicon*", false);
+	SetDevicesWhere(1.0, FALSE, L"*Chat*TC-Helicon*", false);
+	SetDevicesWhere(1.0, FALSE, L"*Mic*TC-Helicon*", false);
 }
 
 static char* BoolToString(BOOL _bool)
@@ -328,12 +343,17 @@ int main(int numArguments, char* arguments[])
 	InitializeAndPopulateAllDevices();
 
 	wchar_t clause[100];
+	bool invalid = false;
 
 	if (numArguments == 2)
 	{
 		if (strcmp(arguments[1], "-l") == 0)
 		{
 			PrintAllDevices();
+		}
+		else if (strcmp(arguments[1], "-r") == 0)
+		{
+			RandomizeAllDevices();
 		}
 		else if (strcmp(arguments[1], "-Astro") == 0)
 		{
@@ -345,7 +365,7 @@ int main(int numArguments, char* arguments[])
 		}
 		else
 		{
-			printf("Unknown arguments...");
+			invalid = true;
 		}
 	}
 	else if (numArguments == 3)
@@ -374,20 +394,29 @@ int main(int numArguments, char* arguments[])
 			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(0.0, TRUE, clause, true);
 		}
+		else
+			invalid = true;
 	}
 	else
 	{
+		invalid = true;
+	}
+	
+	if (invalid)
+	{
 		printf("Unknown or missing arguments.\n\n");
-		printf(" -l\tList all playback and recording devices.\n");
+		printf(" -l\t\tList all playback and recording devices.\n");
 		printf("\n");
-		printf(" -u *\tUnmute and max volume all devices matching given clause.\n");
-		printf(" -un *\tUnmute and max volume all devices NOT matching given clause.\n");
+		printf(" -r\t\tRandomize mute, volume, default, and default communication devices.\n");
 		printf("\n");
-		printf(" -m *\tMute and 0 volume all devices matching given clause.\n");
-		printf(" -mn *\tMute and 0 volume all devices NOT matching given clause.\n");
+		printf(" -u <clause>\tUnmute and max volume all devices matching given clause.\n");
+		printf(" -un <clause>\tUnmute and max volume all devices NOT matching given clause.\n");
 		printf("\n");
-		printf(" -Astro\tSet Default devices to expected Astro devices.\n");
-		printf(" -TC\tSet Default devices to expected TC-Helicon devices.\n");
+		printf(" -m <clause>\tMute and 0 volume all devices matching given clause.\n");
+		printf(" -mn <clause>\tMute and 0 volume all devices NOT matching given clause.\n");
+		printf("\n");
+		printf(" -Astro\t\tSet Default devices to expected Astro devices.\n");
+		printf(" -TC\t\tSet Default devices to expected TC-Helicon devices.\n");
 	}
 
 	return 0;
