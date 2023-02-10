@@ -141,11 +141,39 @@ static void InitializeAndPopulateAllDevices(void)
 	PopulateAllDevices();
 }
 
-static void SetAllDevices(float volumeScalar, BOOL mute)
+bool match(const wchar_t* pattern, const wchar_t* candidate, int p, int c) {
+	if (pattern[p] == L'\0')
+	{
+		return candidate[c] == L'\0';
+	}
+	else if (pattern[p] == L'*')
+	{
+		for (; candidate[c] != L'\0'; c++)
+		{
+			if (match(pattern, candidate, p + 1, c))
+				return true;
+		}
+
+		return match(pattern, candidate, p + 1, c);
+	}
+	else if (pattern[p] != candidate[c])
+	{
+		return false;
+	}
+	else
+	{
+		return match(pattern, candidate, p + 1, c + 1);
+	}
+}
+
+static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* pattern)
 {
 	for (int i = 0; i < NumDevices; i++)
 	{
 		Device* device = &AllDevices[i];
+
+		if (!match(pattern, device->Info.Name, 0, 0))
+			continue;
 
 		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
 		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
@@ -237,31 +265,8 @@ int main(int numArguments, char* arguments[])
 	InitializeAndPopulateAllDevices();
 	PrintAllDevices();
 
-	SetAllDevices(0.0, TRUE);
-	PopulateAllDevices();
-	PrintAllDevices();
-	
-	RandomizeAllDevices();
-	PopulateAllDevices();
-	PrintAllDevices();
-
-	SetAllDevices(1.0, FALSE);
-	PopulateAllDevices();
-	PrintAllDevices();
-
-	/*
-	set volume
-	set default
-	set mute
-	*/
-
-	/*
-	all devices unmute and max volume
-
-	TC Helicon unmute and max volume
-
-	randomize all mute and volume
-	*/
+	SetDevicesWhere(0.0, TRUE, L"*");
+	SetDevicesWhere(1.0, FALSE, L"*");
 
 	return 0;
 }
