@@ -166,13 +166,17 @@ bool match(const wchar_t* pattern, const wchar_t* candidate, int p, int c) {
 	}
 }
 
-static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* pattern)
+static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* pattern, bool invert)
 {
 	for (int i = 0; i < NumDevices; i++)
 	{
 		Device* device = &AllDevices[i];
 
-		if (!match(pattern, device->Info.Name, 0, 0))
+		bool isMatch = match(pattern, device->Info.Name, 0, 0);
+		if (invert)
+			isMatch = !isMatch;
+
+		if (!isMatch)
 			continue;
 
 		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
@@ -350,23 +354,40 @@ int main(int numArguments, char* arguments[])
 		{
 			// Unmute all matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(1.0, FALSE, clause);
+			SetDevicesWhere(1.0, FALSE, clause, false);
 		}
 		else if (strcmp(arguments[1], "-m") == 0)
 		{
 			// Mute all matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(0.0, TRUE, clause);
+			SetDevicesWhere(0.0, TRUE, clause, false);
+		}
+		else if (strcmp(arguments[1], "-un") == 0)
+		{
+			// Unmute all non-matching
+			swprintf(clause, 100, L"%hs", arguments[2]);
+			SetDevicesWhere(1.0, FALSE, clause, true);
+		}
+		else if (strcmp(arguments[1], "-mn") == 0)
+		{
+			// Mute all non-matching devices
+			swprintf(clause, 100, L"%hs", arguments[2]);
+			SetDevicesWhere(0.0, TRUE, clause, true);
 		}
 	}
 	else
 	{
 		printf("Unknown or missing arguments.\n\n");
 		printf(" -l\tList all playback and recording devices.\n");
+		printf("\n");
 		printf(" -u *\tUnmute and max volume all devices matching given clause.\n");
+		printf(" -un *\tUnmute and max volume all devices NOT matching given clause.\n");
+		printf("\n");
 		printf(" -m *\tMute and 0 volume all devices matching given clause.\n");
-		printf("\n -Astro\tSet Default devices to expected Astro devices.\n");
-		printf("\n -TC\tSet Default devices to expected TC-Helicon devices.\n");
+		printf(" -mn *\tMute and 0 volume all devices NOT matching given clause.\n");
+		printf("\n");
+		printf(" -Astro\tSet Default devices to expected Astro devices.\n");
+		printf(" -TC\tSet Default devices to expected TC-Helicon devices.\n");
 	}
 
 	return 0;
