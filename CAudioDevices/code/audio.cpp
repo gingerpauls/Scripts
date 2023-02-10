@@ -1,8 +1,11 @@
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
+#include "PolicyConfig.h"
 
 struct DeviceInfo {
 	LPWSTR Id;
@@ -33,6 +36,7 @@ struct Device
 
 static UINT NumDevices;
 static Device* AllDevices;
+IPolicyConfig* PolicyConfig;
 
 static LPWSTR defaultPlayback;
 static LPWSTR defaultCommunicationPlayback;
@@ -64,6 +68,35 @@ static void PopulateInfo(Device* device)
 		device->Info.IsDefaultCommunicationRecording = TRUE;
 }
 
+static void InitializeDefaultDevices(IMMDeviceEnumerator* deviceEnumerator)
+{
+	IMMDevice* tempDevice;
+	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &tempDevice);
+	tempDevice->GetId(&defaultPlayback);
+
+	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &tempDevice);
+	tempDevice->GetId(&defaultCommunicationPlayback);
+
+	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &tempDevice);
+	tempDevice->GetId(&defaultRecording);
+
+	deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &tempDevice);
+	tempDevice->GetId(&defaultCommunicationRecording);
+}
+
+static void PopulateAllDevices(void)
+{
+	IMMDeviceEnumerator* deviceEnumerator = NULL;
+	CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
+
+	InitializeDefaultDevices(deviceEnumerator);
+
+	for (int i = 0; i < NumDevices; i++)
+	{
+		PopulateInfo(&AllDevices[i]);
+	}
+}
+
 static void InitializeAllDevices(void)
 {
     int MaxDevices = 256;
@@ -71,6 +104,7 @@ static void InitializeAllDevices(void)
 
     IMMDeviceEnumerator* deviceEnumerator = NULL;
     CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
+	CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
     deviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
@@ -81,19 +115,6 @@ static void InitializeAllDevices(void)
     if (count > MaxDevices)
         return;
 
-    IMMDevice* tempDevice;
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &tempDevice);
-    tempDevice->GetId(&defaultPlayback);
-
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &tempDevice);
-    tempDevice->GetId(&defaultCommunicationPlayback);
-    
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &tempDevice);
-    tempDevice->GetId(&defaultRecording);
-
-    deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &tempDevice);
-    tempDevice->GetId(&defaultCommunicationRecording);
-
     Device* currDevice = AllDevices;
     NumDevices = count;
     for (int i = 0; i < count; i++)
@@ -103,10 +124,10 @@ static void InitializeAllDevices(void)
         currDevice->Device->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&currDevice->AudioEndpointVolume);
         currDevice->Device->QueryInterface(__uuidof(IMMEndpoint), (void**)&currDevice->Endpoint);
 
-		PopulateInfo(currDevice);
-
         currDevice++;
     }
+
+	PopulateAllDevices();
 }
 
 static char* BoolToString(BOOL _bool)
@@ -152,6 +173,11 @@ static void PrintAllDevices()
 		if (AllDevices[i].Info.DataFlow != EDataFlow::eRender)
 			continue;
 
+		/*/
+		PolicyConfig->SetDefaultEndpoint(AllDevices[i].Info.Id, ERole::eMultimedia);
+		PolicyConfig->SetDefaultEndpoint(AllDevices[i].Info.Id, ERole::eCommunications);
+		PopulateAllDevices();
+		*/
 		PrintInfo(&AllDevices[i].Info);
 	}
 
@@ -167,16 +193,12 @@ static void PrintAllDevices()
 int main(int numArguments, char* arguments[])
 {
     CoInitialize(NULL);
+	srand(time(NULL));
+
     InitializeAllDevices();
 	PrintAllDevices();
 
 	/*
-	playback volume
-	recording volume
-
-	playback mute
-	recording mute
-
 	set volume
 	set default
 	set mute
