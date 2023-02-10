@@ -364,7 +364,7 @@ int main(int numArguments, char* arguments[])
 		}
 		else if (strcmp(arguments[1], "-un") == 0)
 		{
-			// Unmute all non-matching
+			// Unmute all non-matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(1.0, FALSE, clause, true);
 		}
