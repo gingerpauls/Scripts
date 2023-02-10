@@ -141,6 +141,17 @@ static void InitializeAndPopulateAllDevices(void)
 	PopulateAllDevices();
 }
 
+static void UnmuteAndMaxVolumeAllDevices(void)
+{
+	for (int i = 0; i < NumDevices; i++)
+	{
+		Device* device = &AllDevices[i];
+
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(1.0, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(FALSE, &GUID_NULL);
+	}
+}
+
 static char* BoolToString(BOOL _bool)
 {
 	if (_bool)
@@ -208,6 +219,10 @@ int main(int numArguments, char* arguments[])
 	srand(time(NULL));
 
 	InitializeAndPopulateAllDevices();
+	PrintAllDevices();
+
+	UnmuteAndMaxVolumeAllDevices();
+	PopulateAllDevices();
 	PrintAllDevices();
 
 	/*
