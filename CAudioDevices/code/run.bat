@@ -1,2 +1,2 @@
 @echo off
-call "..\build\audio.exe" -l
+call "..\build\audio.exe"

@@ -361,7 +361,12 @@ int main(int numArguments, char* arguments[])
 	}
 	else
 	{
-		printf("Unknown arguments...");
+		printf("Unknown or missing arguments.\n\n");
+		printf(" -l\tList all playback and recording devices.\n");
+		printf(" -u *\tUnmute and max volume all devices matching given clause.\n");
+		printf(" -m *\tMute and 0 volume all devices matching given clause.\n");
+		printf("\n -Astro\tSet Default devices to expected Astro devices.\n");
+		printf("\n -TC\tSet Default devices to expected TC-Helicon devices.\n");
 	}
 
 	return 0;
