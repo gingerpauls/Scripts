@@ -3,9 +3,19 @@
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
-int main()
+struct DeviceData 
+{
+
+};
+
+int main(int numArguments, char* arguments[])
 {
     CoInitialize(NULL);
+
+    for (int i = 0; i < numArguments; i++)
+    {
+        
+    }
 
     IMMDeviceEnumerator* deviceEnumerator = NULL;
     if (!SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator))))
@@ -48,9 +58,11 @@ int main()
         device->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&volume);
 
         float volumeScalar;
+        float level;
         volume->GetMasterVolumeLevelScalar(&volumeScalar);
+        volume->GetMasterVolumeLevel(&level);
 
-        printf("Name: %ls\n\tVolume: %f\n\n", varProperty.pwszVal, volumeScalar);
+        printf("Name: %ls\n\tVolume: %f\n\tLevel: %f\n\n", varProperty.pwszVal, volumeScalar, level);
     }
 
 	return 0;
