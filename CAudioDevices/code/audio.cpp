@@ -141,14 +141,14 @@ static void InitializeAndPopulateAllDevices(void)
 	PopulateAllDevices();
 }
 
-static void UnmuteAndMaxVolumeAllDevices(void)
+static void SetAllDevices(float volumeScalar, BOOL mute)
 {
 	for (int i = 0; i < NumDevices; i++)
 	{
 		Device* device = &AllDevices[i];
 
-		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(1.0, &GUID_NULL);
-		device->AudioEndpointVolume->SetMute(FALSE, &GUID_NULL);
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
 	}
 }
 
@@ -221,7 +221,11 @@ int main(int numArguments, char* arguments[])
 	InitializeAndPopulateAllDevices();
 	PrintAllDevices();
 
-	UnmuteAndMaxVolumeAllDevices();
+	SetAllDevices(0.0, TRUE);
+	PopulateAllDevices();
+	PrintAllDevices();
+
+	SetAllDevices(1.0, FALSE);
 	PopulateAllDevices();
 	PrintAllDevices();
 
