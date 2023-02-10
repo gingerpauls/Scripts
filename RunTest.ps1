@@ -21,3 +21,5 @@ Function RunAndTime {
     RunAndTime "D:\Scripts\RestoreAllAudio.ps1"
     
     RunAndTime "D:\Scripts\ReportAudioDevices.ps1"
+
+    RunAndTime "D:\Scripts\CAudioDevices\build\audio.exe"
