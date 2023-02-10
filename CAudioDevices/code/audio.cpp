@@ -73,7 +73,7 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 		device->Info.IsDefaultCommunicationRecording = TRUE;
 }
 
-static void InitializeDefaultDevices(DefaultDevices* defaultDevices)
+static void GetDefaultDevices(DefaultDevices* defaultDevices)
 {
 	IMMDevice* device;
 	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
@@ -92,7 +92,7 @@ static void InitializeDefaultDevices(DefaultDevices* defaultDevices)
 static void PopulateAllDevices(void)
 {
 	DefaultDevices defaultDevices;
-	InitializeDefaultDevices(&defaultDevices);
+	GetDefaultDevices(&defaultDevices);
 
 	for (int i = 0; i < NumDevices; i++)
 	{
@@ -100,15 +100,19 @@ static void PopulateAllDevices(void)
 	}
 }
 
-static void InitializeAllDevices(void)
+static void InitializeAndPopulateAllDevices(void)
 {
     int MaxDevices = 256;
+	NumDevices = 0;
 
 	if (AllDevices == NULL)
 		AllDevices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
 
-    CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&DeviceEnumerator));
-	CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
+	if (DeviceEnumerator == NULL)
+		CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&DeviceEnumerator));
+
+	if (PolicyConfig == NULL)
+		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
 	DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
@@ -116,8 +120,11 @@ static void InitializeAllDevices(void)
     UINT count;
     deviceCollectionPtr->GetCount(&count);
 
-    if (count > MaxDevices)
+	if (count > MaxDevices)
+	{
+		printf("Too many devices. Max is %i\n", MaxDevices);
         return;
+	}
 
     Device* currDevice = AllDevices;
     NumDevices = count;
@@ -200,7 +207,7 @@ int main(int numArguments, char* arguments[])
     CoInitialize(NULL);
 	srand(time(NULL));
 
-    InitializeAllDevices();
+	InitializeAndPopulateAllDevices();
 	PrintAllDevices();
 
 	/*
