@@ -230,55 +230,62 @@ static void RandomizeAllDevices()
 
 static void SetAstroDevices()
 {
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, L"*Astro*Game*"))
+	wchar_t* astroGame = L"*Astro*Game*";
+	wchar_t* astroVoice = L"*Astro*Voice*";
+
+	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, astroGame))
 		printf("Set Astro Default Playback Device\n");
 	else 
 		printf("Unable to find Astro Playback Device. Did not set Default Playback Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, L"*Astro*Voice*"))
+	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, astroVoice))
 		printf("Set Astro Default Playback Communication Device\n");
 	else
 		printf("Unable to find Astro Playback Communication Device. Did not set Default Playback Communication Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, L"*Astro*Voice*"))
+	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, astroVoice))
 		printf("Set Astro Default Recording Device\n");
 	else
 		printf("Unable to find Astro Recording Device. Did not set Default Recording Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, L"*Astro*Voice*"))
+	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, astroVoice))
 		printf("Set Astro Default Recording Communication Device\n");
 	else
 		printf("Unable to find Astro Recording Communication Device. Did not set Default Recording Communication Device.\n");
 
-	SetDevicesWhere(1.0, FALSE, L"*Astro*Game*", false);
-	SetDevicesWhere(1.0, FALSE, L"*Astro*Voice*", false);
+	SetDevicesWhere(1.0, FALSE, astroGame, false);
+	SetDevicesWhere(1.0, FALSE, astroVoice, false);
 }
 
 static void SetTCHeliconDevices()
 {
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, L"*System*TC-Helicon*"))
+	wchar_t* TCsystem = L"*System*TC-Helicon*";
+	wchar_t* TCchat = L"*System*TC-Helicon*";
+	wchar_t* TCmic = L"*System*TC-Helicon*";
+
+	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, TCsystem))
 		printf("Set TC-Helicon Default Playback Device\n");
 	else
 		printf("Unable to find TC-Helicon Playback Device. Did not set Default Playback Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, L"*Chat*TC-Helicon*"))
+	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, TCchat))
 		printf("Set TC-Helicon Default Playback Communication Device\n");
 	else
 		printf("Unable to find TC-Helicon Playback Communication Device. Did not set Default Playback Communication Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, L"*Mic*TC-Helicon*"))
+	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, TCmic))
 		printf("Set TC-Helicon Default Recording Device\n");
 	else
 		printf("Unable to find TC-Helicon Recording Device. Did not set Default Recording Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, L"*Mic*TC-Helicon*"))
+	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, TCmic))
 		printf("Set TC-Helicon Default Recording Communication Device\n");
 	else
 		printf("Unable to find TC-Helicon Recording Communication Device. Did not set Default Recording Communication Device.\n");
 
-	SetDevicesWhere(1.0, FALSE, L"*System*TC-Helicon*", false);
-	SetDevicesWhere(1.0, FALSE, L"*Chat*TC-Helicon*", false);
-	SetDevicesWhere(1.0, FALSE, L"*Mic*TC-Helicon*", false);
+	SetDevicesWhere(1.0, FALSE, TCsystem, false);
+	SetDevicesWhere(1.0, FALSE, TCchat, false);
+	SetDevicesWhere(1.0, FALSE, TCmic, false);
 }
 
 static char* BoolToString(BOOL _bool)
