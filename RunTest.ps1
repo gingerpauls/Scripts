@@ -15,21 +15,17 @@ Function RunAndTime {
     }
     
     #RunAndTime "D:\Scripts\WrongAudio.ps1"
-    ## randomize all audio
-    Write-Host "Randomizing..."
+    Write-Host "Randomizing all audio..."
     RunAndTime "D:\Scripts\CAudioDevices\build\audio.exe -r"
 
     #RunAndTime "D:\Scripts\RestoreGoXLRAudio.ps1"
-    ## unmute, max volume, and set TC-Helicon devices to default
-    Write-Host "Setting default devices..."
+    Write-Host "Setting TC-Helicon defualt deviecs. Unmuting and max volume for all..."
     RunAndTime "D:\Scripts\CAudioDevices\build\audio.exe -TC"
 
     #RunAndTime "D:\Scripts\RestoreAllAudio.ps1"
-    ## unmute, max volume all devices
-    Write-Host "Unmuting and maxing all devices..."
+    Write-Host "Unmuting and max volume all devices..."
     RunAndTime "D:\Scripts\CAudioDevices\build\audio.exe -u *"
     
     #RunAndTime "D:\Scripts\ReportAudioDevices.ps1"
-    ## list all devices
     Write-Host "Listing all devices..."
     RunAndTime "D:\Scripts\CAudioDevices\build\audio.exe -l"
