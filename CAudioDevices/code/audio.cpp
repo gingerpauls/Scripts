@@ -261,12 +261,24 @@ static void PrintAllDevices()
 int main(int numArguments, char* arguments[])
 {
     CoInitialize(NULL);
-
 	InitializeAndPopulateAllDevices();
-	PrintAllDevices();
 
-	SetDevicesWhere(0.0, TRUE, L"*");
-	SetDevicesWhere(1.0, FALSE, L"*");
+	wchar_t clause[100];
+
+	if (numArguments >= 2 && strcmp(arguments[1], "-l") == 0)
+	{
+		PrintAllDevices();
+	}
+	else if (numArguments >= 3 && strcmp(arguments[1], "-m") == 0)
+	{ // Mute all matching devices
+		swprintf(clause, 100, L"%hs", arguments[2]);
+		SetDevicesWhere(0.0, TRUE, clause);
+	}
+	else if (numArguments >= 3 && strcmp(arguments[1], "-u") == 0)
+	{ // Unmute all matching devices
+		swprintf(clause, 100, L"%hs", arguments[2]);
+		SetDevicesWhere(1.0, FALSE, clause);
+	}
 
 	return 0;
 }
