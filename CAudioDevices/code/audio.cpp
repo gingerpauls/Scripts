@@ -377,28 +377,27 @@ int main(int numArguments, char* arguments[])
 	}
 	else if (numArguments == 3)
 	{
+		wchar_t clause[100];
+		swprintf(clause, 100, L"%hs", arguments[2]);
+
 		if (strcmp(arguments[1], "-u") == 0)
 		{
 			// Unmute all matching devices
-			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(1.0, FALSE, clause, false);
 		}
 		else if (strcmp(arguments[1], "-m") == 0)
 		{
 			// Mute all matching devices
-			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(0.0, TRUE, clause, false);
 		}
 		else if (strcmp(arguments[1], "-un") == 0)
 		{
 			// Unmute all non-matching devices
-			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(1.0, FALSE, clause, true);
 		}
 		else if (strcmp(arguments[1], "-mn") == 0)
 		{
 			// Mute all non-matching devices
-			swprintf(clause, 100, L"%hs", arguments[2]);
 			SetDevicesWhere(0.0, TRUE, clause, true);
 		}
 		else
