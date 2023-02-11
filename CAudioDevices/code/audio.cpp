@@ -42,11 +42,15 @@ struct DefaultDevices {
 	LPWSTR CommunicationRecording;
 };
 
-static UINT NumDevices;
-static Device* AllDevices;
+struct Memory {
+	UINT NumDevices;
+	Device* Devices;
+	
+	DefaultDevices DefaultDevices;
 
-IMMDeviceEnumerator* DeviceEnumerator;
-IPolicyConfig* PolicyConfig;
+	IMMDeviceEnumerator* DeviceEnumerator;
+	IPolicyConfig* PolicyConfig;
+};
 
 static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 {
@@ -73,61 +77,62 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 		device->Info.IsDefaultCommunicationRecording = TRUE;
 }
 
-static void GetDefaultDevices(DefaultDevices* defaultDevices)
+static void GetDefaultDevices(Memory* memory, DefaultDevices* defaultDevices)
 {
 	IMMDevice* device;
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
+	memory->DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
 	device->GetId(&defaultDevices->Playback);
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
+	memory->DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
 	device->GetId(&defaultDevices->CommunicationPlayback);
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device);
+	memory->DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device);
 	device->GetId(&defaultDevices->Recording);
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &device);
+	memory->DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &device);
 	device->GetId(&defaultDevices->CommunicationRecording);
 }
 
-static void PopulateAllDevices(void)
+static void PopulateAllDevices(Memory* memory)
 {
 	DefaultDevices defaultDevices;
-	GetDefaultDevices(&defaultDevices);
+	GetDefaultDevices(memory, &defaultDevices);
 
-	for (int i = 0; i < NumDevices; i++)
+	for (int i = 0; i < memory->NumDevices; i++)
 	{
-		PopulateInfo(&AllDevices[i], &defaultDevices);
+		PopulateInfo(&memory->Devices[i], &defaultDevices);
 	}
 }
 
-static void InitializeAndPopulateAllDevices(void)
+static void InitializeAndPopulateAllDevices(Memory* memory)
 {
     int MaxDevices = 256;
-	NumDevices = 0;
+	if (memory == NULL)
+		memory = (Memory*)VirtualAlloc(0, sizeof(Memory), MEM_COMMIT, PAGE_READWRITE);
 
-	if (AllDevices == NULL)
-		AllDevices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
+	if (memory->Devices == NULL)
+		memory->Devices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
 
-	if (DeviceEnumerator == NULL)
-		CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&DeviceEnumerator));
+	if (memory->DeviceEnumerator == NULL)
+		CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&memory->DeviceEnumerator));
 
-	if (PolicyConfig == NULL)
-		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
+	if (memory->PolicyConfig == NULL)
+		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&memory->PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
-	DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
+	memory->DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
 
     UINT count;
     deviceCollectionPtr->GetCount(&count);
 
 	if (count > MaxDevices)
 	{
-		printf("Too many devices. Max is %i\n", MaxDevices);
+		printf("Too many devices. Max is %i.\nStopping.\n", MaxDevices);
         return;
 	}
 
-    Device* currDevice = AllDevices;
-    NumDevices = count;
+    Device* currDevice = memory->Devices;
+    memory->NumDevices = count;
     for (int i = 0; i < count; i++)
     {
         deviceCollectionPtr->Item(i, &currDevice->Device);
@@ -138,7 +143,7 @@ static void InitializeAndPopulateAllDevices(void)
         currDevice++;
     }
 
-	PopulateAllDevices();
+	PopulateAllDevices(memory);
 }
 
 bool match(const wchar_t* pattern, const wchar_t* candidate, int p, int c) {
@@ -166,11 +171,11 @@ bool match(const wchar_t* pattern, const wchar_t* candidate, int p, int c) {
 	}
 }
 
-static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* pattern, bool invert)
+static void SetDevicesWhere(Memory* memory, float volumeScalar, BOOL mute, const wchar_t* pattern, bool invert)
 {
-	for (int i = 0; i < NumDevices; i++)
+	for (int i = 0; i < memory->NumDevices; i++)
 	{
-		Device* device = &AllDevices[i];
+		Device* device = &memory->Devices[i];
 
 		bool isMatch = match(pattern, device->Info.Name, 0, 0);
 		if (invert)
@@ -184,17 +189,17 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 	}
 }
 
-static bool SetDefaultDevicesWhere(ERole role, EDataFlow dataFlow, const wchar_t* pattern)
+static bool SetDefaultDevicesWhere(Memory* memory, ERole role, EDataFlow dataFlow, const wchar_t* pattern)
 {
 	bool flag = false;
-	for (int i = 0; i < NumDevices; i++)
+	for (int i = 0; i < memory->NumDevices; i++)
 	{
-		Device* device = &AllDevices[i];
+		Device* device = &memory->Devices[i];
 
 		if (!match(pattern, device->Info.Name, 0, 0) || device->Info.DataFlow != dataFlow)
 			continue;
 
-		PolicyConfig->SetDefaultEndpoint(device->Info.Id, role);
+		memory->PolicyConfig->SetDefaultEndpoint(device->Info.Id, role);
 		flag = true;
 		break;
 	}
@@ -202,13 +207,13 @@ static bool SetDefaultDevicesWhere(ERole role, EDataFlow dataFlow, const wchar_t
 	return flag;
 }
 
-static void RandomizeAllDevices()
+static void RandomizeAllDevices(Memory* memory)
 {
 	srand(time(NULL));
 
-	for (int i = 0; i < NumDevices; i++)
+	for (int i = 0; i < memory->NumDevices; i++)
 	{
-		Device* device = &AllDevices[i];
+		Device* device = &memory->Devices[i];
 
 		float randomScalar = (float)rand() / (float)(RAND_MAX);
 		float randomMute = (float)rand() / (float)(RAND_MAX);
@@ -222,70 +227,70 @@ static void RandomizeAllDevices()
 		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
 
 		if (randomDefault < 0.25)
-			SetDefaultDevicesWhere(ERole::eMultimedia, device->Info.DataFlow, device->Info.Name);
+			SetDefaultDevicesWhere(memory, ERole::eMultimedia, device->Info.DataFlow, device->Info.Name);
 		if (randomDefaultCommunication < 0.25)
-			SetDefaultDevicesWhere(ERole::eCommunications, device->Info.DataFlow, device->Info.Name);
+			SetDefaultDevicesWhere(memory, ERole::eCommunications, device->Info.DataFlow, device->Info.Name);
 	}
 }
 
-static void SetAstroDevices()
+static void SetAstroDevices(Memory* memory)
 {
 	wchar_t* astroGame = L"*Astro*Game*";
 	wchar_t* astroVoice = L"*Astro*Voice*";
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, astroGame))
+	if (SetDefaultDevicesWhere(memory, ERole::eMultimedia, EDataFlow::eRender, astroGame))
 		printf("Set Astro Default Playback Device\n");
 	else 
 		printf("Unable to find Astro Playback Device. Did not set Default Playback Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, astroVoice))
+	if (SetDefaultDevicesWhere(memory, ERole::eCommunications, EDataFlow::eRender, astroVoice))
 		printf("Set Astro Default Playback Communication Device\n");
 	else
 		printf("Unable to find Astro Playback Communication Device. Did not set Default Playback Communication Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, astroVoice))
+	if (SetDefaultDevicesWhere(memory, ERole::eMultimedia, EDataFlow::eCapture, astroVoice))
 		printf("Set Astro Default Recording Device\n");
 	else
 		printf("Unable to find Astro Recording Device. Did not set Default Recording Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, astroVoice))
+	if (SetDefaultDevicesWhere(memory, ERole::eCommunications, EDataFlow::eCapture, astroVoice))
 		printf("Set Astro Default Recording Communication Device\n");
 	else
 		printf("Unable to find Astro Recording Communication Device. Did not set Default Recording Communication Device.\n");
 
-	SetDevicesWhere(1.0, FALSE, astroGame, false);
-	SetDevicesWhere(1.0, FALSE, astroVoice, false);
+	SetDevicesWhere(memory, 1.0, FALSE, astroGame, false);
+	SetDevicesWhere(memory, 1.0, FALSE, astroVoice, false);
 }
 
-static void SetTCHeliconDevices()
+static void SetTCHeliconDevices(Memory* memory)
 {
 	wchar_t* TCsystem = L"*System*TC-Helicon*";
 	wchar_t* TCchat = L"*System*TC-Helicon*";
 	wchar_t* TCmic = L"*System*TC-Helicon*";
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, TCsystem))
+	if (SetDefaultDevicesWhere(memory, ERole::eMultimedia, EDataFlow::eRender, TCsystem))
 		printf("Set TC-Helicon Default Playback Device\n");
 	else
 		printf("Unable to find TC-Helicon Playback Device. Did not set Default Playback Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eRender, TCchat))
+	if (SetDefaultDevicesWhere(memory, ERole::eCommunications, EDataFlow::eRender, TCchat))
 		printf("Set TC-Helicon Default Playback Communication Device\n");
 	else
 		printf("Unable to find TC-Helicon Playback Communication Device. Did not set Default Playback Communication Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eCapture, TCmic))
+	if (SetDefaultDevicesWhere(memory, ERole::eMultimedia, EDataFlow::eCapture, TCmic))
 		printf("Set TC-Helicon Default Recording Device\n");
 	else
 		printf("Unable to find TC-Helicon Recording Device. Did not set Default Recording Device.\n");
 
-	if (SetDefaultDevicesWhere(ERole::eCommunications, EDataFlow::eCapture, TCmic))
+	if (SetDefaultDevicesWhere(memory, ERole::eCommunications, EDataFlow::eCapture, TCmic))
 		printf("Set TC-Helicon Default Recording Communication Device\n");
 	else
 		printf("Unable to find TC-Helicon Recording Communication Device. Did not set Default Recording Communication Device.\n");
 
-	SetDevicesWhere(1.0, FALSE, TCsystem, false);
-	SetDevicesWhere(1.0, FALSE, TCchat, false);
-	SetDevicesWhere(1.0, FALSE, TCmic, false);
+	SetDevicesWhere(memory, 1.0, FALSE, TCsystem, false);
+	SetDevicesWhere(memory, 1.0, FALSE, TCchat, false);
+	SetDevicesWhere(memory, 1.0, FALSE, TCmic, false);
 }
 
 static char* BoolToString(BOOL _bool)
@@ -325,29 +330,31 @@ static void PrintInfo(DeviceInfo* info)
 	printf("\n");
 }
 
-static void PrintAllDevices()
+static void PrintAllDevices(Memory* memory)
 {
 	printf("------------ Playback Devices ------------\n");
-	for (int i = 0; i < NumDevices; i++) {
-		if (AllDevices[i].Info.DataFlow != EDataFlow::eRender)
+	for (int i = 0; i < memory->NumDevices; i++) {
+		if (memory->Devices[i].Info.DataFlow != EDataFlow::eRender)
 			continue;
 
-		PrintInfo(&AllDevices[i].Info);
+		PrintInfo(&memory->Devices[i].Info);
 	}
 
 	printf("------------ Recording Devices ------------\n");
-	for (int i = 0; i < NumDevices; i++) {
-		if (AllDevices[i].Info.DataFlow != EDataFlow::eCapture)
+	for (int i = 0; i < memory->NumDevices; i++) {
+		if (memory->Devices[i].Info.DataFlow != EDataFlow::eCapture)
 			continue;
 
-		PrintInfo(&AllDevices[i].Info);
+		PrintInfo(&memory->Devices[i].Info);
 	}
 }
 
 int main(int numArguments, char* arguments[])
 {
+	Memory* memory = NULL;
+
     CoInitialize(NULL);
-	InitializeAndPopulateAllDevices();
+	InitializeAndPopulateAllDevices(memory);
 
 	wchar_t clause[100];
 	bool invalid = false;
@@ -356,19 +363,19 @@ int main(int numArguments, char* arguments[])
 	{
 		if (strcmp(arguments[1], "-l") == 0)
 		{
-			PrintAllDevices();
+			PrintAllDevices(memory);
 		}
 		else if (strcmp(arguments[1], "-r") == 0)
 		{
-			RandomizeAllDevices();
+			RandomizeAllDevices(memory);
 		}
 		else if (strcmp(arguments[1], "-Astro") == 0)
 		{
-			SetAstroDevices();
+			SetAstroDevices(memory);
 		}
 		else if (strcmp(arguments[1], "-TC") == 0)
 		{
-			SetTCHeliconDevices();
+			SetTCHeliconDevices(memory);
 		}
 		else
 		{
@@ -381,25 +388,25 @@ int main(int numArguments, char* arguments[])
 		{
 			// Unmute all matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(1.0, FALSE, clause, false);
+			SetDevicesWhere(memory, 1.0, FALSE, clause, false);
 		}
 		else if (strcmp(arguments[1], "-m") == 0)
 		{
 			// Mute all matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(0.0, TRUE, clause, false);
+			SetDevicesWhere(memory, 0.0, TRUE, clause, false);
 		}
 		else if (strcmp(arguments[1], "-un") == 0)
 		{
 			// Unmute all non-matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(1.0, FALSE, clause, true);
+			SetDevicesWhere(memory, 1.0, FALSE, clause, true);
 		}
 		else if (strcmp(arguments[1], "-mn") == 0)
 		{
 			// Mute all non-matching devices
 			swprintf(clause, 100, L"%hs", arguments[2]);
-			SetDevicesWhere(0.0, TRUE, clause, true);
+			SetDevicesWhere(memory, 0.0, TRUE, clause, true);
 		}
 		else
 			invalid = true;
