@@ -45,8 +45,6 @@ struct DefaultDevices {
 struct Memory {
 	UINT NumDevices;
 	Device* Devices;
-	
-	DefaultDevices DefaultDevices;
 
 	IMMDeviceEnumerator* DeviceEnumerator;
 	IPolicyConfig* PolicyConfig;
@@ -104,23 +102,23 @@ static void PopulateAllDevices(Memory* memory)
 	}
 }
 
-static void InitializeAndPopulateAllDevices(Memory* memory)
+static void InitializeAndPopulateAllDevices(Memory** memory)
 {
     int MaxDevices = 256;
-	if (memory == NULL)
-		memory = (Memory*)VirtualAlloc(0, sizeof(Memory), MEM_COMMIT, PAGE_READWRITE);
+	if (*memory == NULL)
+		*memory = (Memory*)VirtualAlloc(0, sizeof(Memory), MEM_COMMIT, PAGE_READWRITE);
 
-	if (memory->Devices == NULL)
-		memory->Devices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
+	if ((*memory)->Devices == NULL)
+		(*memory)->Devices = (Device*)VirtualAlloc(0, sizeof(Device) * MaxDevices, MEM_COMMIT, PAGE_READWRITE);
 
-	if (memory->DeviceEnumerator == NULL)
-		CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&memory->DeviceEnumerator));
+	if ((*memory)->DeviceEnumerator == NULL)
+		CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(*memory->DeviceEnumerator));
 
-	if (memory->PolicyConfig == NULL)
-		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&memory->PolicyConfig);
+	if ((*memory)->PolicyConfig == NULL)
+		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)*memory->PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
-	memory->DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
+	(*memory)->DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollectionPtr);
 
     UINT count;
     deviceCollectionPtr->GetCount(&count);
@@ -354,7 +352,7 @@ int main(int numArguments, char* arguments[])
 	Memory* memory = NULL;
 
     CoInitialize(NULL);
-	InitializeAndPopulateAllDevices(memory);
+	InitializeAndPopulateAllDevices(&memory);
 
 	wchar_t clause[100];
 	bool invalid = false;
