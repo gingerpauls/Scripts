@@ -11,7 +11,8 @@
 struct DeviceInfo {
 	LPWSTR Id;
 	LPWSTR Name;
-	LPWSTR InterfaceName;
+	//LPWSTR InterfaceName;
+	// not necessary - use *TC*
 
 	// Volume
 	float VolumeScalar;
@@ -57,8 +58,8 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 	PROPVARIANT varProperty;
 	device->PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
 	device->Info.Name = varProperty.pwszVal;
-	device->PropertyStore->GetValue(PKEY_DeviceInterface_FriendlyName, &varProperty);
-	device->Info.InterfaceName = varProperty.pwszVal;
+	//device->PropertyStore->GetValue(PKEY_DeviceInterface_FriendlyName, &varProperty);
+	//device->Info.InterfaceName = varProperty.pwszVal;
 
 	device->Endpoint->GetDataFlow(&device->Info.DataFlow);
 
@@ -185,7 +186,7 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 
 		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
 		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
-		//todo: implement enabling, set vol, set mute for "TC*" devices (use DeviceInfo InterfaceName)
+		//todo: implement enabling "*TC*"
 		//PolicyConfig->SetEndpointVisibility(device->Info.Id, true);
 	}
 }
@@ -303,6 +304,7 @@ static char* BoolToString(BOOL _bool)
 
 static char* BoolToStringShort(BOOL _bool)
 {
+	//try and implement * for default and ** for comm
 	if (_bool)
 		return "*";
 	return "";
@@ -310,8 +312,8 @@ static char* BoolToStringShort(BOOL _bool)
 
 static void PrintInfo(DeviceInfo* info)
 {
-	printf("%ls\n", info->Name);
-	printf("%ls", info->InterfaceName);
+	printf("%ls", info->Name);
+	//printf("%ls", info->InterfaceName);
 	printf("%s", BoolToStringShort(info->IsDefaultPlayback));
 	printf("%s", BoolToStringShort(info->IsDefaultCommunicationPlayback));
 	printf("%s", BoolToStringShort(info->IsDefaultRecording));
