@@ -260,8 +260,8 @@ static void SetAstroDevices()
 static void SetTCHeliconDevices()
 {
 	wchar_t* TCsystem = L"*System*TC-Helicon*";
-	wchar_t* TCchat = L"*System*TC-Helicon*";
-	wchar_t* TCmic = L"*System*TC-Helicon*";
+	wchar_t* TCchat = L"*Chat*TC-Helicon*";
+	wchar_t* TCmic = L"*Mic*TC-Helicon*";
 
 	if (SetDefaultDevicesWhere(ERole::eMultimedia, EDataFlow::eRender, TCsystem))
 		printf("Set TC-Helicon Default Playback Device\n");
