@@ -1,4 +1,5 @@
 #include <string.h>
+#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -10,6 +11,7 @@
 struct DeviceInfo {
 	LPWSTR Id;
 	LPWSTR Name;
+	LPWSTR InterfaceName;
 
 	// Volume
 	float VolumeScalar;
@@ -55,6 +57,8 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 	PROPVARIANT varProperty;
 	device->PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
 	device->Info.Name = varProperty.pwszVal;
+	device->PropertyStore->GetValue(PKEY_DeviceInterface_FriendlyName, &varProperty);
+	device->Info.InterfaceName = varProperty.pwszVal;
 
 	device->Endpoint->GetDataFlow(&device->Info.DataFlow);
 
@@ -181,6 +185,7 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 
 		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
 		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
+		//todo: implement enabling, set vol, set mute for "TC*" devices (use DeviceInfo InterfaceName)
 		//PolicyConfig->SetEndpointVisibility(device->Info.Id, true);
 	}
 }
@@ -296,32 +301,62 @@ static char* BoolToString(BOOL _bool)
 	return "False";
 }
 
+static char* BoolToStringShort(BOOL _bool)
+{
+	if (_bool)
+		return "*";
+	return "";
+}
+
 static void PrintInfo(DeviceInfo* info)
 {
 	printf("%ls\n", info->Name);
-	printf("\tVolume: %f\n", info->VolumeScalar);
-	printf("\tLevel: %f\n", info->VolumeLevel);
-	printf("\tIsMute: %s\n", BoolToString(info->IsMute));
+	printf("%ls", info->InterfaceName);
+	printf("%s", BoolToStringShort(info->IsDefaultPlayback));
+	printf("%s", BoolToStringShort(info->IsDefaultCommunicationPlayback));
+	printf("%s", BoolToStringShort(info->IsDefaultRecording));
+	printf("%s\n", BoolToStringShort(info->IsDefaultCommunicationRecording));
 
-	char* flowString;
-	if (info->DataFlow == EDataFlow::eCapture)
-		flowString = "Recording";
-	if (info->DataFlow == EDataFlow::eRender)
-		flowString = "Playback";
-	printf("\tType: %s\n", flowString);
+	int simpleVolumeScalar = (info->VolumeScalar)*100;
+
+	//printf("\tVolume: %f\n", info->VolumeScalar);
+	printf("\tVolume: %i\n", simpleVolumeScalar);
+	//printf("\tLevel: %f\n", info->VolumeLevel);
+
+
+	//WHY THE FUCK CAN'T I DO THIS?
+	//string muteState;
+
+	char* muteState = "";
+	if (info->IsMute == TRUE) {
+		muteState = "Muted";
+	}
+	else {
+		muteState = "Unmuted";
+	}
+	printf("\t%s\n", muteState);
+
+	//char* flowString;
+	//if (info->DataFlow == EDataFlow::eCapture)
+	//	flowString = "Recording";
+	//if (info->DataFlow == EDataFlow::eRender)
+	//	flowString = "Playback";
+	//printf("\tType: %s\n", flowString);
+
+
 
 	//TODO abstract this?
-	if (info->DataFlow == EDataFlow::eCapture)
-	{
-		printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultRecording));
-		printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationRecording));
-	}
+	//if (info->DataFlow == EDataFlow::eCapture)
+	//{
+	//	printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultRecording));
+	//	printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationRecording));
+	//}
 
-	if (info->DataFlow == EDataFlow::eRender)
-	{
-		printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultPlayback));
-		printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationPlayback));
-	}
+	//if (info->DataFlow == EDataFlow::eRender)
+	//{
+	//	printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultPlayback));
+	//	printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationPlayback));
+	//}
 
 	printf("\n");
 }
