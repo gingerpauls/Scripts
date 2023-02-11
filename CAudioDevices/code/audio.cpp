@@ -181,6 +181,7 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 
 		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
 		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
+		//PolicyConfig->SetEndpointVisibility(device->Info.Id, true);
 	}
 }
 
