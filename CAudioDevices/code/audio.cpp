@@ -6,6 +6,9 @@
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include "PolicyConfig.h"
+#include "windows.h"
+//#include <WinUser.h>
+//#include "WinUser.h"
 
 struct DeviceInfo {
 	LPWSTR Id;
@@ -394,6 +397,12 @@ static void PrintAllDevices()
 
 int main(int numArguments, char* arguments[])
 {
+	//HWND console = GetConsoleWindow();
+	//RECT ConsoleRect;
+	//GetWindowRect(console, &ConsoleRect);
+	//MoveWindow(console, ConsoleRect.left, ConsoleRect.top, 60, 40, TRUE);
+
+
     CoInitialize(NULL);
 	InitializeAndPopulateAllDevices();
 
