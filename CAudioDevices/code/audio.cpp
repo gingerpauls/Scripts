@@ -1,5 +1,4 @@
 #include <string.h>
-#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -11,8 +10,6 @@
 struct DeviceInfo {
 	LPWSTR Id;
 	LPWSTR Name;
-	//LPWSTR InterfaceName;
-	// not necessary - use *TC*
 
 	// Volume
 	float VolumeScalar;
@@ -33,8 +30,8 @@ struct Device
 
     IMMDevice* Device;
     IPropertyStore* PropertyStore;
-    //IAudioEndpointVolume* AudioEndpointVolume;
-    //IMMEndpoint* Endpoint;
+    IAudioEndpointVolume* AudioEndpointVolume;
+    IMMEndpoint* Endpoint;
 };
 
 struct DefaultDevices {
@@ -58,12 +55,10 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 	PROPVARIANT varProperty;
 	device->PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
 	device->Info.Name = varProperty.pwszVal;
-	//device->PropertyStore->GetValue(PKEY_DeviceInterface_FriendlyName, &varProperty);
-	//device->Info.InterfaceName = varProperty.pwszVal;
 
-	//device->Endpoint->GetDataFlow(&device->Info.DataFlow);
+	device->Endpoint->GetDataFlow(&device->Info.DataFlow);
 
-	/*device->AudioEndpointVolume->GetMasterVolumeLevelScalar(&device->Info.VolumeScalar);
+	device->AudioEndpointVolume->GetMasterVolumeLevelScalar(&device->Info.VolumeScalar);
 	device->AudioEndpointVolume->GetMasterVolumeLevel(&device->Info.VolumeLevel);
 	device->AudioEndpointVolume->GetMute(&device->Info.IsMute);
 
@@ -75,35 +70,44 @@ static void PopulateInfo(Device* device, DefaultDevices* defaultDevices)
 	if (lstrcmpW(device->Info.Id, defaultDevices->Recording) == 0)
 		device->Info.IsDefaultRecording = TRUE;
 	if (lstrcmpW(device->Info.Id, defaultDevices->CommunicationRecording) == 0)
-		device->Info.IsDefaultCommunicationRecording = TRUE;*/
+		device->Info.IsDefaultCommunicationRecording = TRUE;
 }
 
 static void GetDefaultDevices(DefaultDevices* defaultDevices)
 {
 	IMMDevice* device;
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
-	device->GetId(&defaultDevices->Playback);
+	if ( SUCCEEDED( DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device) ) ) {
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
-	device->GetId(&defaultDevices->CommunicationPlayback);
+		DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &device);
+		device->GetId(&defaultDevices->Playback);
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device);
-	device->GetId(&defaultDevices->Recording);
+		DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
+		device->GetId(&defaultDevices->CommunicationPlayback);
 
-	DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &device);
-	device->GetId(&defaultDevices->CommunicationRecording);
+	}
+
+	if ( SUCCEEDED( DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device) ) ) {
+
+		DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device);
+		device->GetId(&defaultDevices->Recording);
+
+		DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eCommunications, &device);
+		device->GetId(&defaultDevices->CommunicationRecording);
+
+	} 
 }
 
 static void PopulateAllDevices(void)
 {
-	//DefaultDevices defaultDevices;
-	//GetDefaultDevices(&defaultDevices);
+	DefaultDevices defaultDevices;
 
+	GetDefaultDevices(&defaultDevices);
+	
 	for (int i = 0; i < NumDevices; i++)
 	{
-		//PopulateInfo(&AllDevices[i], &defaultDevices);
-		PopulateInfo(&AllDevices[i], NULL);
+		PopulateInfo(&AllDevices[i], &defaultDevices);
 	}
+	
 }
 
 static void InitializeAndPopulateAllDevices(void)
@@ -121,11 +125,11 @@ static void InitializeAndPopulateAllDevices(void)
 		CoCreateInstance(__uuidof(CPolicyConfigClient), NULL, CLSCTX_ALL, __uuidof(IPolicyConfig), (LPVOID*)&PolicyConfig);
 
     IMMDeviceCollection* deviceCollectionPtr = NULL;
-	DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED , &deviceCollectionPtr);
-
+	DeviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollectionPtr);
+	
     UINT count;
     deviceCollectionPtr->GetCount(&count);
-
+	
 	if (count > MaxDevices)
 	{
 		printf("Too many devices. Max is %i\n", MaxDevices);
@@ -136,20 +140,17 @@ static void InitializeAndPopulateAllDevices(void)
     NumDevices = count;
     for (int i = 0; i < count; i++)
     {
+		
         deviceCollectionPtr->Item(i, &currDevice->Device);
         currDevice->Device->OpenPropertyStore(STGM_READ, &currDevice->PropertyStore);
-        //currDevice->Device->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&currDevice->AudioEndpointVolume);
-        //currDevice->Device->QueryInterface(__uuidof(IMMEndpoint), (void**)&currDevice->Endpoint);
-
-		PROPVARIANT varProperty;
-		currDevice->PropertyStore->GetValue(PKEY_Device_FriendlyName, &varProperty);
-		//device->Info.Name = varProperty.pwszVal;
-
-		printf("%ls\n", varProperty.pwszVal);
-
+        currDevice->Device->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&currDevice->AudioEndpointVolume);
+        currDevice->Device->QueryInterface(__uuidof(IMMEndpoint), (void**)&currDevice->Endpoint);
+		
         currDevice++;
+		
     }
-
+	
+	
 	PopulateAllDevices();
 }
 
@@ -184,22 +185,18 @@ static void SetDevicesWhere(float volumeScalar, BOOL mute, const wchar_t* patter
 	{
 		Device* device = &AllDevices[i];
 
-		//bool isMatch = match(pattern, device->Info.Name, 0, 0);
-		//if (invert)
-			//isMatch = !isMatch;
+		//isMatch possibly doesn't do anything?
+		bool isMatch = match(pattern, device->Info.Name, 0, 0);
+		if (invert)
+			isMatch = !isMatch;
 
-		//if (!isMatch)
-			//continue;
+		if (!isMatch)
+			continue;
 
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
 
-		printf("%ls\n", device->Info.Id);
-		//device->AudioEndpointVolume->SetMasterVolumeLevelScalar(volumeScalar, &GUID_NULL);
-		//device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
-		//todo: implement enabling "*TC*"
-		if (SUCCEEDED(PolicyConfig->SetEndpointVisibility(device->Info.Id, true)))
-			printf("Sucecss!\n");
-		else 
-			printf("Failure...\n");
+		PolicyConfig->SetEndpointVisibility(device->Info.Id, true);
 	}
 }
 
@@ -231,19 +228,23 @@ static void RandomizeAllDevices()
 
 		float randomScalar = (float)rand() / (float)(RAND_MAX);
 		float randomMute = (float)rand() / (float)(RAND_MAX);
+		float randomEnable = (float)rand() / (float)(RAND_MAX);
+
 		BOOL mute = randomMute >= 0.5;
+		BOOL enableDisable = randomEnable >= 0.5;
 
 		float randomDefault = (float)rand() / (float)(RAND_MAX);
-
 		float randomDefaultCommunication = (float)rand() / (float)(RAND_MAX);
 
-		//device->AudioEndpointVolume->SetMasterVolumeLevelScalar(randomScalar, &GUID_NULL);
-		//device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
+		device->AudioEndpointVolume->SetMasterVolumeLevelScalar(randomScalar, &GUID_NULL);
+		device->AudioEndpointVolume->SetMute(mute, &GUID_NULL);
 
-		//if (randomDefault < 0.25)
-		//	SetDefaultDevicesWhere(ERole::eMultimedia, device->Info.DataFlow, device->Info.Name);
-		//if (randomDefaultCommunication < 0.25)
-		//	SetDefaultDevicesWhere(ERole::eCommunications, device->Info.DataFlow, device->Info.Name);
+		if (randomDefault < 0.25)
+			SetDefaultDevicesWhere(ERole::eMultimedia, device->Info.DataFlow, device->Info.Name);
+		if (randomDefaultCommunication < 0.25)
+			SetDefaultDevicesWhere(ERole::eCommunications, device->Info.DataFlow, device->Info.Name);
+		
+		PolicyConfig->SetEndpointVisibility(device->Info.Id, enableDisable);
 	}
 }
 
@@ -314,38 +315,35 @@ static char* BoolToString(BOOL _bool)
 	return "False";
 }
 
-static char* BoolToStringShort(BOOL _bool)
-{
-	//try and implement * for default and ** for comm
-	if (_bool)
-		return "*";
-	return "";
-}
-
 static void PrintInfo(DeviceInfo* info)
 {
 	printf("%ls", info->Name);
-	//printf("%ls", info->InterfaceName);
-	printf("%s", BoolToStringShort(info->IsDefaultPlayback));
-	printf("%s", BoolToStringShort(info->IsDefaultCommunicationPlayback));
-	printf("%s", BoolToStringShort(info->IsDefaultRecording));
-	printf("%s\n", BoolToStringShort(info->IsDefaultCommunicationRecording));
+	if (info->IsDefaultPlayback)
+		printf(" * ");
+	if (info->IsDefaultCommunicationPlayback)
+		printf(" ** ");
+	if (info->IsDefaultRecording)
+		printf(" * ");
+	if (info->IsDefaultCommunicationRecording)
+		printf(" ** ");
+	printf("\n");
 
 	int simpleVolumeScalar = (info->VolumeScalar)*100;
-
 	//printf("\tVolume: %f\n", info->VolumeScalar);
 	printf("\tVolume: %i\n", simpleVolumeScalar);
-	//printf("\tLevel: %f\n", info->VolumeLevel);
 
+	//printf("\tLevel: %f\n", info->VolumeLevel);
 
 	//WHY THE FUCK CAN'T I DO THIS?
 	//string muteState;
 
 	char* muteState = "";
-	if (info->IsMute == TRUE) {
+	if (info->IsMute == TRUE) 
+	{
 		muteState = "Muted";
 	}
-	else {
+	else 
+	{
 		muteState = "Unmuted";
 	}
 	printf("\t%s\n", muteState);
@@ -399,83 +397,81 @@ int main(int numArguments, char* arguments[])
     CoInitialize(NULL);
 	InitializeAndPopulateAllDevices();
 
-	SetDevicesWhere(1.0, 0, L"*", false);
+	wchar_t clause[100];
+	bool invalid = false;
 
-	//wchar_t clause[100];
-	//bool invalid = false;
+	if (numArguments == 2)
+	{
+		if (strcmp(arguments[1], "-l") == 0)
+		{
+			PrintAllDevices();
+		}
+		else if (strcmp(arguments[1], "-r") == 0)
+		{
+			RandomizeAllDevices();
+		}
+		else if (strcmp(arguments[1], "-Astro") == 0)
+		{
+			SetAstroDevices();
+		}
+		else if (strcmp(arguments[1], "-TC") == 0)
+		{
+			SetTCHeliconDevices();
+		}
+		else
+		{
+			invalid = true;
+		}
+	}
+	else if (numArguments == 3)
+	{
+		wchar_t clause[100];
+		swprintf(clause, 100, L"%hs", arguments[2]);
 
-	//if (numArguments == 2)
-	//{
-	//	if (strcmp(arguments[1], "-l") == 0)
-	//	{
-	//		PrintAllDevices();
-	//	}
-	//	else if (strcmp(arguments[1], "-r") == 0)
-	//	{
-	//		RandomizeAllDevices();
-	//	}
-	//	else if (strcmp(arguments[1], "-Astro") == 0)
-	//	{
-	//		SetAstroDevices();
-	//	}
-	//	else if (strcmp(arguments[1], "-TC") == 0)
-	//	{
-	//		SetTCHeliconDevices();
-	//	}
-	//	else
-	//	{
-	//		invalid = true;
-	//	}
-	//}
-	//else if (numArguments == 3)
-	//{
-	//	wchar_t clause[100];
-	//	swprintf(clause, 100, L"%hs", arguments[2]);
-
-	//	if (strcmp(arguments[1], "-u") == 0)
-	//	{
-	//		// Unmute all matching devices
-	//		SetDevicesWhere(1.0, FALSE, clause, false);
-	//	}
-	//	else if (strcmp(arguments[1], "-m") == 0)
-	//	{
-	//		// Mute all matching devices
-	//		SetDevicesWhere(0.0, TRUE, clause, false);
-	//	}
-	//	else if (strcmp(arguments[1], "-un") == 0)
-	//	{
-	//		// Unmute all non-matching devices
-	//		SetDevicesWhere(1.0, FALSE, clause, true);
-	//	}
-	//	else if (strcmp(arguments[1], "-mn") == 0)
-	//	{
-	//		// Mute all non-matching devices
-	//		SetDevicesWhere(0.0, TRUE, clause, true);
-	//	}
-	//	else
-	//		invalid = true;
-	//}
-	//else
-	//{
-	//	invalid = true;
-	//}
-	//
-	//if (invalid)
-	//{
-	//	printf("Unknown or missing arguments.\n\n");
-	//	printf(" -l\t\tList all playback and recording devices.\n");
-	//	printf("\n");
-	//	printf(" -r\t\tRandomize mute, volume, default, and default communication devices.\n");
-	//	printf("\n");
-	//	printf(" -u <clause>\tUnmute and max volume all devices matching given clause.\n");
-	//	printf(" -un <clause>\tUnmute and max volume all devices NOT matching given clause.\n");
-	//	printf("\n");
-	//	printf(" -m <clause>\tMute and 0 volume all devices matching given clause.\n");
-	//	printf(" -mn <clause>\tMute and 0 volume all devices NOT matching given clause.\n");
-	//	printf("\n");
-	//	printf(" -Astro\t\tSet Default devices to expected Astro devices.\n");
-	//	printf(" -TC\t\tSet Default devices to expected TC-Helicon devices.\n");
-	//}
+		if (strcmp(arguments[1], "-u") == 0)
+		{
+			// Unmute all matching devices
+			SetDevicesWhere(1.0, FALSE, clause, false);
+		}
+		else if (strcmp(arguments[1], "-m") == 0)
+		{
+			// Mute all matching devices
+			SetDevicesWhere(0.0, TRUE, clause, false);
+		}
+		else if (strcmp(arguments[1], "-un") == 0)
+		{
+			// Unmute all non-matching devices
+			SetDevicesWhere(1.0, FALSE, clause, true);
+		}
+		else if (strcmp(arguments[1], "-mn") == 0)
+		{
+			// Mute all non-matching devices
+			SetDevicesWhere(0.0, TRUE, clause, true);
+		}
+		else
+			invalid = true;
+	}
+	else
+	{
+		invalid = true;
+	}
+	
+	if (invalid)
+	{
+		printf("Unknown or missing arguments.\n\n");
+		printf(" -l\t\tList all playback and recording devices.\n");
+		printf("\n");
+		printf(" -r\t\tRandomize mute, volume, default, and default communication devices.\n");
+		printf("\n");
+		printf(" -u <clause>\tUnmute and max volume all devices matching given clause.\n");
+		printf(" -un <clause>\tUnmute and max volume all devices NOT matching given clause.\n");
+		printf("\n");
+		printf(" -m <clause>\tMute and 0 volume all devices matching given clause.\n");
+		printf(" -mn <clause>\tMute and 0 volume all devices NOT matching given clause.\n");
+		printf("\n");
+		printf(" -Astro\t\tSet Default devices to expected Astro devices.\n");
+		printf(" -TC\t\tSet Default devices to expected TC-Helicon devices.\n");
+	}
 
 	return 0;
 }
