@@ -6,9 +6,9 @@
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include "PolicyConfig.h"
-#include "windows.h"
-//#include <WinUser.h>
-//#include "WinUser.h"
+#include <Windows.h>
+#include <WinUser.h>
+
 
 struct DeviceInfo {
 	LPWSTR Id;
@@ -86,7 +86,6 @@ static void GetDefaultDevices(DefaultDevices* defaultDevices)
 
 		DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eCommunications, &device);
 		device->GetId(&defaultDevices->CommunicationPlayback);
-
 	}
 
 	if ( SUCCEEDED( DeviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eCapture, ERole::eMultimedia, &device) ) ) {
@@ -332,13 +331,7 @@ static void PrintInfo(DeviceInfo* info)
 	printf("\n");
 
 	int simpleVolumeScalar = (info->VolumeScalar)*100;
-	//printf("\tVolume: %f\n", info->VolumeScalar);
 	printf("\tVolume: %i\n", simpleVolumeScalar);
-
-	//printf("\tLevel: %f\n", info->VolumeLevel);
-
-	//WHY THE FUCK CAN'T I DO THIS?
-	//string muteState;
 
 	char* muteState = "";
 	if (info->IsMute == TRUE) 
@@ -350,28 +343,6 @@ static void PrintInfo(DeviceInfo* info)
 		muteState = "Unmuted";
 	}
 	printf("\t%s\n", muteState);
-
-	//char* flowString;
-	//if (info->DataFlow == EDataFlow::eCapture)
-	//	flowString = "Recording";
-	//if (info->DataFlow == EDataFlow::eRender)
-	//	flowString = "Playback";
-	//printf("\tType: %s\n", flowString);
-
-
-
-	//TODO abstract this?
-	//if (info->DataFlow == EDataFlow::eCapture)
-	//{
-	//	printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultRecording));
-	//	printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationRecording));
-	//}
-
-	//if (info->DataFlow == EDataFlow::eRender)
-	//{
-	//	printf("\tIsDefault: %s\n", BoolToString(info->IsDefaultPlayback));
-	//	printf("\tIsDefaultCommunication: %s\n", BoolToString(info->IsDefaultCommunicationPlayback));
-	//}
 
 	printf("\n");
 }
@@ -397,10 +368,10 @@ static void PrintAllDevices()
 
 int main(int numArguments, char* arguments[])
 {
-	//HWND console = GetConsoleWindow();
-	//RECT ConsoleRect;
-	//GetWindowRect(console, &ConsoleRect);
-	//MoveWindow(console, ConsoleRect.left, ConsoleRect.top, 60, 40, TRUE);
+	HWND console = GetConsoleWindow();
+	RECT ConsoleRect;
+	GetWindowRect(console, &ConsoleRect);
+	MoveWindow(console, ConsoleRect.left, ConsoleRect.top, 500, 1400, TRUE);
 
 
     CoInitialize(NULL);
