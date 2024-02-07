@@ -59,29 +59,6 @@ return
 	else Run Mmsys.cpl
 return
 
-; Volume Mixer
-^!+x::
-	;if WinActive("Mixer")
-	;	WinClose
-	;else
-	;{
-	;	Run SndVol.exe
-	;	sleep 0030
-	;	WinMove, Mixer, , X, Y, 1000, 350
-	;}
-
-	if WinActive("Settings")
-		WinClose
-	else
-	{
-		Run ms-settings:apps-volume
-		sleep 0030
-		WinRestore, Settings
-		sleep 0030
-		WinMove, Settings, , X, Y, 729, 1087
-	}
-return
-
 ; Display Settings
 ^!+d::
 	if WinActive("Settings")
@@ -110,15 +87,8 @@ return
 		}
 return
 
-
-; Mutes mic globally
-^!+q::
-return
-
-
 ; Resize active window to be small, medium, large
 ^!+z::
-	
 	StoreOriginalWinPos(X, Y, W, H, A)
 	if MonitorSizeIndex >= 3
 		MonitorSizeIndex = 0
@@ -129,52 +99,19 @@ return
 WinMoveBasedOnIndex(MonitorSizeIndex) 
 {
 	if MonitorSizeIndex = 0
-		WinMove, A, ,X, Y, 1280, 720
-
+		WinMove, A, ,X, Y, 640, 355
 	if MonitorSizeIndex = 1
-		WinMove, A, ,X, Y, 1280, 1408
-		
+		WinMove, A, ,X, Y, 640, 1408
 	if MonitorSizeIndex = 2
-		WinMove, A, ,X, Y, 1920, 1408
-		
+		WinMove, A, ,X, Y, 1280, 720
 	return
 }
 
 StoreOriginalWinPos(X, Y, W, H, A)
 {
 	WinGetPos, X, Y, W, H, A
-	
 	return
 }
-
-
-
-;Quicker Alt tab, Caps Lock
-;CapsLock::
-;	send {~LWin Down}
-;	sleep 0030
-;	send {~LWin Up}
-;	sleep 0030
-;return
-
-; Move active window to other virtual desktop
-;#Left::
-;	WinGetTitle, Title, A
-;    WinSet, ExStyle, ^0x80, %Title%
-;    Send {LWin down}{Ctrl down}{Left}{Ctrl up}{LWin up}
-;    sleep, 50
-;    WinSet, ExStyle, ^0x80, %Title%
-;    WinActivate, %Title%
-;Return
-
-;#Right::
-;    WinGetTitle, Title, A
-;    WinSet, ExStyle, ^0x80, %Title%
-;    Send {LWin down}{Ctrl down}{Right}{Ctrl up}{LWin up}
-;    sleep, 50
-;    WinSet, ExStyle, ^0x80, %Title%
-;    WinActivate, %Title%
-;Return 
 
 ;Always on top, Alt+t
 ^!+t::
@@ -196,6 +133,6 @@ return
 
 ; Compile Macros.exe and move to common startup
 ^!+c::
-	Run, C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe /in "D:\Scripts\Macros.ahk" /out "C:\Users\hutch\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Macros.exe"
+	Run, C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe /in "D:\Programming\Scripts\Macros.ahk" /out "C:\Users\hutch\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Macros.exe"
 return
 
