@@ -43,6 +43,12 @@ return
 	Run, D:\Programming\Programs\soundvolumeview-x64\SoundVolumeView.exe /LoadProfile "D:\Programming\Programs\soundvolumeview-x64\Sound Profiles\Reaper.spr"
 return
 
+; All Screens On - TV Speakers
+^!3::
+	Run, D:\Programming\Programs\multimonitortool-x64\MultiMonitorTool.exe /LoadConfig "D:\Programming\Programs\multimonitortool-x64\Monitor Config\All.cfg"
+	Run, D:\Programming\Programs\soundvolumeview-x64\SoundVolumeView.exe /LoadProfile "D:\Programming\Programs\soundvolumeview-x64\Sound Profiles\All.spr"
+return
+
 ; Desk with REAPER
 ^!+3::
 	Run, "C:\Program Files\REAPER (x64)\reaper.exe"
@@ -50,7 +56,6 @@ return
 	Run, D:\Programming\Programs\soundvolumeview-x64\SoundVolumeView.exe /LoadProfile "D:\Programming\Programs\soundvolumeview-x64\Sound Profiles\DeskReaper.spr"
 	;Process, Close, REAPER.exe
 return
-
 
 ; Legacy Sound
 ^!+s::
